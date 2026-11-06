@@ -1,65 +1,65 @@
 # momolulu
 
-A gentle coding companion for DeepSeek Harness (DSH): scenic photos, a focus timer, wellbeing reminders, weather, and a session radar.
+给 DeepSeek Harness（DSH）的一点温柔陪伴：照片背景、专注计时、休息提醒、天气，以及跨会话的「会话雷达」。
 
-让 momolulu 陪你编程：照片陪伴、专注计时、喝水与站立提醒、天气，以及跨会话快捷定位。
+**中文** | [English](README.en.md)
 
-![momolulu scenic artwork](assets/scene-lake.jpg)
+![momolulu 概览：DSH 聊天界面与右下角照片陪伴](docs/overview.webp)
 
-## Features / 功能
+## 功能
 
-- Floating photo companion, subtle motion, compact avatar and progress ring.
-- 15 / 25 / 45 / 60-minute focus countdown, pause/resume, reset and fullscreen entry on a user click.
-- Water/stretch reminders every 20 minutes, brief motion and highlighting, snooze, and an 8-second preview.
-- Weather for Nanjing by default; optional user-initiated location lookup through Open-Meteo.
-- Session radar: running conversations, ended/unread conversations, input requests and permission requests; click a row to navigate.
-- Passive radar alerts never answer questions, grant permissions, or switch conversations automatically.
-- Reading-protection mode, adjustable background brightness/opacity, Chinese and English copy, reduced-motion support.
+- **照片陪伴**：右下角照片卡片，轻微浮动与缓慢呼吸动效；可收成带进度环和倒计时的小头像。
+- **专注计时**：15 / 25 / 45 / 60 分钟可选，暂停、继续、重置；开始专注时请求全屏，按 Esc 只退出全屏、不打断计时。
+- **休息提醒**：默认每 20 分钟提示喝水 / 站立，到点轻晃并高亮提醒行，可「收到」或「10 分钟后提醒」；提供 8 秒测试预览。
+- **会话雷达**：列出运行中、刚结束待查看、等待输入、请求权限的普通会话，点击整行直接跳转；不会自动切换、不会代答或授予权限。
+- **天气**：默认南京，经 Open-Meteo 查询；只有你主动点击「使用当前位置」时才请求定位。
+- **阅读保护**：默认减弱聊天区域的背景干扰，右侧保留景色；背景亮度与浓度可调。
+- 中英文界面文案，支持系统「减少动态效果」。
 
-## Install / 安装
+## 安装
 
-Designed for **DSH 0.2.2-rc.1**. Other DSH versions are not yet verified. The package declares this exact runtime requirement conservatively.
+面向 **DSH 0.2.2-rc.1**，其他版本尚未验证。
 
-In DSH's plugin installer, install the commit-pinned Git specification listed in the GitHub release notes. Alternatively clone this repository and ask DSH's plugin manager to install its absolute directory as a bundle. Do not run a separate Web server.
+在 DSH 的插件安装入口中，使用 GitHub Release 说明里提供的、固定到 commit 的 Git 安装地址。也可以克隆本仓库，把目录的绝对路径交给 DSH 插件管理器作为 bundle 安装。**不需要另外启动 Web 服务。**
 
-**Existing local users:** disable or uninstall `@local/lumululu-mei` before enabling `momolulu`; both packages render the same companion. The existing `llm.companion.v2` storage key is retained, so preferences and timer data can continue on the same browser origin. Keep a backup if you need to roll back.
+> **已经在用旧本地包的用户**：启用 `momolulu` 前，请先停用或卸载 `@local/lumululu-mei`，两者会同时渲染同一个陪伴组件。浏览器本地存储键 `llm.companion.v2` 保持不变，同一页面源下偏好与计时数据可以延续；需要回滚时请先备份。
 
-### Discover / 市场索引
+### 加入 Discover 插件源
 
-If your DSH profile has the optional plugin-market Discover feature enabled, add this index source:
+如果你的 DSH 配置启用了可选的插件市场 Discover，可添加这个自建索引地址：
 
 ```
 https://raw.githubusercontent.com/YinniCoding/momolulu/main/market.json
 ```
 
-This is a **self-hosted index**, not a claim of inclusion in a central or official marketplace. It points to a fixed Git commit. npm publication has not been performed.
+这是**维护者自建的索引**，不代表已进入某个中心化或官方市场。索引固定到发布 commit，尚未发布到 npm。
 
-## Use / 使用
+## 使用
 
-- Click the photo to open the focus panel; use its quick play/pause control without opening the panel.
-- Click `−` to minimize to an avatar, then click the avatar to restore the photo.
-- Open **Reminder settings → Test reminder (8 sec)** to preview motion/highlighting without changing deadlines.
-- Click the radar summary or avatar badge to inspect other conversations; click a row to open it.
-- Open **Appearance** for scene, motion, reading protection, background brightness and opacity controls.
-- Starting focus requests browser fullscreen. Esc exits fullscreen without stopping the timer. Pause, completion and plugin unload do not force fullscreen exit.
+- 点击照片展开专注面板；倒计时旁的按钮可直接开始 / 暂停，不必展开面板。
+- 点 `−` 收成小头像，点小头像恢复照片。
+- 展开「提醒设置 → 测试提醒（8 秒）」，可预览晃动与高亮，不影响真实提醒时间。
+- 点雷达摘要或小头像角标查看其他会话；点整行进入对应对话。
+- 展开「外观设置」可切换场景、动效、阅读保护，调整背景亮度与浓度。
+- 暂停、计时结束或插件卸载都不会强制退出全屏；只有 Esc 或「退出全屏」会退出。
 
-## Privacy / 隐私
+## 隐私
 
-See [PRIVACY.md](PRIVACY.md). No plugin analytics or developer backend is used. Weather makes third-party requests; local preference/timer storage is browser-local. Location is optional.
+见 [PRIVACY.md](PRIVACY.md)。插件没有开发者后台，也没有插件统计；天气是第三方请求，偏好与计时保存在浏览器本地，定位可选。
 
-## Known limitations / 已知限制
+## 已知限制
 
-- Radar lists ordinary conversations, not child-agent conversations. Ended/unread does not imply successful execution; unread state is page-local and may be lost on refresh.
-- Multiple windows do not synchronize focus timer state.
-- Browser/Electron policies may deny fullscreen or location. These failures should not prevent focus timing.
-- Timers and visual reminders are not OS alarms: closing DSH or suspending the device prevents timely delivery; the countdown catches up when ticks resume.
-- Default weather city is Nanjing. Located coordinates are rounded to two decimal places and held only in memory.
-- Automated tests cover clock logic, radar classification/attention, and fullscreen control with an injected test port. Cross-platform visual layout and genuine fullscreen/navigation/permission events still require manual verification.
-- No automatic updater is included. Follow the DSH plugin manager's supported uninstall/reinstall procedure for a newer release.
+- 雷达只列普通会话，不含子代理会话。「刚结束」不代表执行成功；待查看状态仅在当前页面保留，刷新后可能丢失。
+- 多个窗口之间不共享专注计时状态。
+- 浏览器或 Electron 可能拒绝全屏或定位，这类失败不会阻止计时。
+- 计时与提醒不是系统级闹钟：关闭 DSH 或设备休眠时不会准时触发，恢复后会按截止时间追赶。
+- 天气默认南京；通过定位取得的坐标保留两位小数，且只存在内存中。
+- 自动化测试覆盖计时逻辑、雷达分类与提醒判定、全屏控制（注入测试端口）。跨平台视觉布局、真实全屏、会话跳转与权限事件仍需手动验证。
+- 未内置自动更新；升级请按 DSH 插件管理器支持的方式卸载后重装。
 
-## Development
+## 开发
 
-Requires Node.js 20 or newer for local checks; no build step or install scripts are required.
+本地检查需要 Node.js 20 及以上；无需构建步骤，也没有安装脚本。
 
 ```sh
 npm run check
@@ -67,6 +67,6 @@ npm test
 npm pack --dry-run
 ```
 
-## Rights and attribution
+## 权利与署名
 
-See [NOTICE.md](NOTICE.md). This repository is publicly readable but is **not currently licensed as open source**. Weather data: [Open-Meteo](https://open-meteo.com/), CC BY 4.0. No affiliation with DeepSeek or character-rights owners is implied.
+见 [NOTICE.md](NOTICE.md)。本仓库可公开阅读，但**目前不是开源许可**。天气数据来自 [Open-Meteo](https://open-meteo.com/)（CC BY 4.0）。与 DeepSeek 及角色权利方无隶属关系。

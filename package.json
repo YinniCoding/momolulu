@@ -19,7 +19,9 @@
     "assets/*.jpg",
     "README.md",
     "PRIVACY.md",
-    "NOTICE.md"
+    "NOTICE.md",
+    "README.en.md",
+    "docs/*.webp"
   ],
   "dsh": {
     "bundle": {
