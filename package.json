@@ -1,0 +1,61 @@
+{
+  "name": "momolulu",
+  "version": "1.0.12",
+  "type": "module",
+  "description": "momolulu, a gentle coding companion with scenic backgrounds, live session activity, focus timing and wellbeing nudges.",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./assets/*": "./assets/*"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "assets/*.jpg",
+    "README.md",
+    "PRIVACY.md",
+    "NOTICE.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-layout"
+      ]
+    }
+  },
+  "license": "UNLICENSED",
+  "author": "YinniCoding",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YinniCoding/momolulu.git"
+  },
+  "homepage": "https://github.com/YinniCoding/momolulu#readme",
+  "bugs": {
+    "url": "https://github.com/YinniCoding/momolulu/issues"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "focus",
+    "companion"
+  ],
+  "scripts": {
+    "test": "node --test focus.test.mjs fullscreen.test.mjs",
+    "check": "node --check client.js && node --check index.js"
+  },
+  "engines": {
+    "dsh": "0.2.2-rc.1"
+  }
+}
