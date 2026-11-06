@@ -1,0 +1,54 @@
+{
+  "format": 1,
+  "title": {
+    "en": "momolulu plugins",
+    "zh": "momolulu 插件源"
+  },
+  "description": {
+    "en": "The maintainer's self-hosted momolulu index.",
+    "zh": "momolulu 维护者自建的插件索引。"
+  },
+  "plugins": [
+    {
+      "name": "momolulu",
+      "title": {
+        "en": "momolulu",
+        "zh": "momolulu"
+      },
+      "description": {
+        "en": "A gentle DSH companion with focus timing, scenic photos, wellbeing reminders, weather and session radar.",
+        "zh": "DSH 编程陪伴：专注计时、照片背景、休息提醒、天气和会话雷达。"
+      },
+      "author": "YinniCoding",
+      "homepage": "https://github.com/YinniCoding/momolulu",
+      "repository": {
+        "url": "https://github.com/YinniCoding/momolulu"
+      },
+      "icon": "./icon.svg",
+      "metadata": {
+        "keywords": [
+          "focus",
+          "companion",
+          "weather",
+          "session",
+          "专注",
+          "陪伴"
+        ]
+      },
+      "versions": [
+        {
+          "version": "1.0.12",
+          "publishTimestamp": 1793959584,
+          "engines": {
+            "dsh": "0.2.2-rc.1"
+          },
+          "source": {
+            "type": "git",
+            "url": "https://github.com/YinniCoding/momolulu",
+            "commit": "fb422f0b62356a8b841bd9bf2e456eea11bf29c6"
+          }
+        }
+      ]
+    }
+  ]
+}
