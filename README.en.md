@@ -67,6 +67,9 @@ npm test
 npm pack --dry-run
 ```
 
-## Rights and attribution
+## License
 
-See [NOTICE.md](NOTICE.md). This repository is publicly readable but is **not currently open source licensed**. Weather data: [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). No affiliation with DeepSeek or the character-rights owners is implied.
+- **Source code**: [MIT](LICENSE).
+- **Artwork** (the three scenic photos, icon and screenshot): [CC BY 4.0](LICENSE-ARTWORK.md); attribute as "momolulu artwork © 2026 YinniCoding, CC BY 4.0".
+
+Weather data: [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). No affiliation with DeepSeek or the character-rights owners is implied; see [NOTICE.md](NOTICE.md).

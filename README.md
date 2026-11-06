@@ -67,6 +67,9 @@ npm test
 npm pack --dry-run
 ```
 
-## 权利与署名
+## 开源许可
 
-见 [NOTICE.md](NOTICE.md)。本仓库可公开阅读，但**目前不是开源许可**。天气数据来自 [Open-Meteo](https://open-meteo.com/)（CC BY 4.0）。与 DeepSeek 及角色权利方无隶属关系。
+- **代码**：[MIT](LICENSE)。
+- **图片素材**（三张场景图、图标与截图）：[CC BY 4.0](LICENSE-ARTWORK.md)，署名「momolulu artwork © 2026 YinniCoding，CC BY 4.0」。
+
+天气数据来自 [Open-Meteo](https://open-meteo.com/)（CC BY 4.0）。与 DeepSeek 及角色权利方无隶属关系，详见 [NOTICE.md](NOTICE.md)。
