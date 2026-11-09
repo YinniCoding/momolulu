@@ -13,7 +13,7 @@ window.__ModuleLoader__.load({
     const zh = {
       title: 'momolulu', subtitle: '慢慢来，我陪你一起。', meadow: '草甸', hike: '徒步', lake: '湖畔',
       radarWaiting: '等待处理', radarApproval: '请求权限', radarQuestion: '等待输入', radarSoftHint: '有其他会话可查看，无需确认或立即处理。', radar: '会话雷达', radarRunning: '运行中', radarUnread: '刚结束 · 待查看', radarEmpty: '暂无运行中或待查看的会话', radarHint: '结束不代表成功；待查看状态仅在当前页面保留。', openFailed: '无法打开此会话，请从侧栏重试。', showAll: '展开全部', showLess: '收起列表', reminderPaused: '提醒随专注暂停',
-      testReminder: '测试提醒（8 秒）', minimize: '缩成小头像', restore: '恢复照片', details: '详情',
+      testReminder: '测试提醒（8 秒）', sound: '提示音', soundOn: '提示音 · 开', soundOff: '提示音 · 关', focusCommand: '专注', focusCommandHint: '开始或暂停 momolulu 的专注计时', minimize: '缩成小头像', restore: '恢复照片', details: '详情',
       close: '收起', focus: '专注倒计时', start: '开始专注', pause: '暂停', resume: '继续', reset: '重置',
       ready: '准备好，开始一小段专注', running: '专注中', paused: '已暂停', done: '这一轮完成啦',
       minutes: '分钟', elapsed: '已专注', reminders: '休息提醒', on: '开启', off: '关闭', next: '距离下次休息',
@@ -29,7 +29,7 @@ window.__ModuleLoader__.load({
     const en = {
       title: 'momolulu', subtitle: 'One step at a time, together.', meadow: 'Meadow', hike: 'Hike', lake: 'Lake',
       radarWaiting: 'Needs input', radarApproval: 'Permission requested', radarQuestion: 'Waiting for input', radarSoftHint: 'Other sessions have updates. No acknowledgement or immediate action required.', radar: 'Session radar', radarRunning: 'Running', radarUnread: 'Ended · unread', radarEmpty: 'No running or unread sessions', radarHint: 'Ended does not mean successful. Unread status is local to this page.', openFailed: 'Unable to open this session. Try the sidebar.', showAll: 'Show all', showLess: 'Show less', reminderPaused: 'Reminders paused with focus',
-      testReminder: 'Test reminder (8 sec)', minimize: 'Minimize to avatar', restore: 'Restore photo', details: 'Details',
+      testReminder: 'Test reminder (8 sec)', sound: 'Chime', soundOn: 'Chime · On', soundOff: 'Chime · Off', focusCommand: 'Focus', focusCommandHint: 'Start or pause the momolulu focus timer', minimize: 'Minimize to avatar', restore: 'Restore photo', details: 'Details',
       close: 'Close', focus: 'Focus countdown', start: 'Start focus', pause: 'Pause', resume: 'Resume', reset: 'Reset',
       ready: 'Ready for a little focus time', running: 'Focusing', paused: 'Paused', done: 'Session complete',
       minutes: 'min', elapsed: 'Focused', reminders: 'Break reminders', on: 'On', off: 'Off', next: 'Next break in',
@@ -93,6 +93,7 @@ window.__ModuleLoader__.load({
         minutes, status: valid ? saved.status : 'ready', remaining: valid ? saved.remaining : total,
         deadline: valid ? saved.deadline : 0, now: Date.now(),
         reminderRemaining: Number.isFinite(saved?.reminderRemaining) ? Math.max(0, saved.reminderRemaining) : 20 * 60000,
+        sound: saved?.sound === true,
         reminders: saved?.reminders !== false, nextReminder: Number.isFinite(saved?.nextReminder) ? saved.nextReminder : 0,
         pausedDate: typeof saved?.pausedDate === 'string' ? saved.pausedDate : '', notice: '', noticeAt: 0,
         scene: [0, 1, 2].includes(saved?.scene) ? saved.scene : 0,
@@ -112,15 +113,49 @@ window.__ModuleLoader__.load({
       if (persist) storage.save(state);
       for (const fn of listeners) fn();
     }
+    // Optional chime. The AudioContext is created only after a user gesture, so
+    // browsers that block autoplay simply stay silent instead of erroring.
+    let audioContext;
+    function ensureAudio() {
+      try {
+        const Ctor = window.AudioContext || window.webkitAudioContext;
+        if (!Ctor) return undefined;
+        audioContext ??= new Ctor();
+        if (audioContext.state === 'suspended') void audioContext.resume().catch(() => {});
+      } catch { audioContext = undefined; }
+      return audioContext;
+    }
+    function playChime() {
+      const audio = ensureAudio();
+      if (!audio || audio.state !== 'running') return;
+      const start = audio.currentTime;
+      [660, 880].forEach((frequency, index) => {
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        const at = start + index * 0.18;
+        oscillator.type = 'sine';
+        oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(0, at);
+        gain.gain.linearRampToValueAtTime(0.12, at + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
+        oscillator.connect(gain).connect(audio.destination);
+        oscillator.start(at);
+        oscillator.stop(at + 0.4);
+      });
+    }
     function tick(now = Date.now()) {
       const patch = { now };
       let persist = false;
       if (state.status === 'running' && remainingMs(state, now) === 0) {
         Object.assign(patch, { status: 'done', remaining: 0 });
-        if (state.reminders && state.pausedDate !== new Date(now).toDateString()) Object.assign(patch, { notice: 'finish', noticeAt: now });
+        if (state.reminders && state.pausedDate !== new Date(now).toDateString()) {
+          Object.assign(patch, { notice: 'finish', noticeAt: now });
+          if (state.sound) playChime();
+        }
         persist = true;
       } else if (state.status === 'running' && state.reminders && state.pausedDate !== new Date(now).toDateString() && state.nextReminder && now >= state.nextReminder) {
         Object.assign(patch, { notice: 'break', noticeAt: now, nextReminder: now + 20 * 60000 });
+        if (state.sound) playChime();
         persist = true;
       }
       update(patch, persist);
@@ -323,7 +358,7 @@ window.__ModuleLoader__.load({
         rows.slice(0, showAll ? rows.length : 3).map((row) => button(
           h(React.Fragment, null, h('span', { className: 'llm-radar-row-title' }, row.displayTitle || row.id, row.attentionKind && h('small', { className: 'llm-radar-kind' }, t(row.attentionKind))), h('span', { 'aria-hidden': true }, '↗')),
           () => navigate(row), { key: row.id, className: 'llm-radar-row', title: `${row.displayTitle || row.id}${row.cwd ? '\n' + row.cwd : ''}` })));
-      return h('div', { className: `llm-root ${panelMode ? 'llm-panel' : 'llm-floating'}` },
+      return h('div', { className: `llm-root ${panelMode ? 'llm-panel' : 'llm-floating'}`, onPointerDownCapture: () => { if (model.sound) ensureAudio(); } },
         h('style', null, css),
         model.bgOn && h('div', { className: 'llm-bg' + (model.readingProtection && !panelMode ? ' llm-bg-protected' : ''), style: { backgroundImage: `url("${asset(currentScene.name)}")`, opacity: model.intensity / 100, filter: `brightness(${model.brightness / 100}) saturate(1.12)` } }),
         !panelMode && h('button', { type: 'button', ref: radarTrigger, className: 'llm-radar-trigger' + (radarHighlight ? ' llm-radar-attention' : '') + (radarShake ? ' llm-alert-shake' : '') + (model.minimized && !expanded ? ' llm-radar-badge' : ''), onClick: () => { setRadarOpen(!radarOpen); setRadarAttentionAt(0); }, 'aria-expanded': radarOpen, 'aria-controls': radarId, 'aria-label': `${t('radar')} · ${radarSummary}`, title: radarSummary + (radarHighlight ? ' · ' + t('radarSoftHint') : '') }, model.minimized && !expanded ? (radarCount > 99 ? '99+' : radarCount || '☷') : `☷ ${radarSummary}`),
@@ -366,6 +401,7 @@ window.__ModuleLoader__.load({
             h('div', { className: 'llm-sub', style: { marginTop: 10 } }, `${t('elapsed')} · ${formatTime(total - remaining)}`)),
           h('details', { className: 'llm-disclosure' }, h('summary', null, `${t('reminderSettings')} · ${t(model.reminders && !todayPaused ? 'on' : 'off')}`),
             h('div', { className: 'llm-settings' }, button(t(model.reminders && !todayPaused ? 'on' : 'off'), () => setReminders(!model.reminders || todayPaused), { role: 'switch', 'aria-checked': model.reminders && !todayPaused })),
+            h('div', { className: 'llm-settings' }, button(t(model.sound ? 'soundOn' : 'soundOff'), () => { update({ sound: !model.sound }); if (!model.sound) ensureAudio(); }, { role: 'switch', 'aria-checked': model.sound })),
             h('div', { className: 'llm-summary' }, t('reminderEvery')),
             button(t('testReminder'), () => { const now = Date.now(); update({ now, previewAt: now, previewUntil: now + 8000 }, false); setOpen(false); if (panelMode) layout.selectPanel(null); }),
             h('div', { className: 'llm-summary' }, reminderLabel(model))),
@@ -419,6 +455,17 @@ window.__ModuleLoader__.load({
           document.addEventListener('fullscreenchange', onChange);
           return () => { document.removeEventListener('fullscreenchange', onChange); control.dispose(); if (fullscreenControl === control) fullscreenControl = undefined; };
         }, 'lumululu-mei fullscreen lifecycle');
+        ctx.inject(['commandUi'], (scope) => {
+          const commandUi = scope.get('commandUi');
+          if (commandUi === undefined) return;
+          scope.effect(() => commandUi.register({
+            name: 'focus',
+            label: () => t('focusCommand'),
+            description: () => t('focusCommandHint'),
+            available: () => true,
+            ui: { kind: 'action', run: () => { if (state.status === 'running') pause(); else startFocused(); } },
+          }), 'momolulu /focus command');
+        });
         ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({ name: 'sidebar.panellist', id: 'lumululu-mei', order: 18, label: () => t('title') }, Icon));
         ctx.slots.inject('main', () => ctx.slots.register({ name: 'main', key: 'lumululu-mei' }, (props) => h(Companion, { ...props, panelMode: true })));
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({ name: 'shell.overlay', id: 'lumululu-mei-overlay', order: 100, label: () => t('title') }, Companion));

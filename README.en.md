@@ -18,9 +18,11 @@ dsh plugin --profile web add momolulu
 
 - **Photo companion**: a scenic card in the lower right with gentle motion; collapse it to an avatar with a countdown.
 - **Focus timer**: 15/25/45/60 minutes, pausable. Optionally fullscreen; Esc leaves fullscreen without stopping the timer.
-- **Break reminders**: every 20 minutes, a brief nudge to drink water and stretch, with a shake and highlight.
+- **Break reminders**: every 20 minutes, a brief nudge to drink water and stretch, with a shake and highlight; optional chime (off by default).
 - **Session radar**: running, just-finished, waiting-for-input and permission-requesting sessions; click one to jump to it.
 - **Weather**: Open-Meteo, Nanjing by default; location is requested only after you click "Use my location".
+
+Typing `/focus` in the composer also starts or pauses the timer.
 
 Focus requests fullscreen as an optional touch; a denied request never affects the timer.
 
