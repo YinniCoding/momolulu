@@ -27,7 +27,7 @@ dsh plugin --profile web add momolulu
 
 ## Install
 
-Built for **DSH 0.2.2-rc.1**; other versions are not yet verified.
+Built for **DSH 0.2.1-rc.5 through 0.2.x**; verified mainly on 0.2.2-rc.1, earlier 0.2.x releases are untested.
 
 Published on npm. Install it in one line (replace `web` with your profile name):
 
@@ -84,7 +84,7 @@ The default coordinates are Nanjing (32.06, 118.80). Location is requested only 
 It is an optional bit of ceremony. A denied fullscreen request does not affect the timer, and Esc exits fullscreen without stopping it.
 
 **Which DSH versions are supported?**
-`0.2.2-rc.1` is the version declared and verified. Others are untested.
+Declared support: `>=0.2.1-rc.5 <0.3.0`; verified mainly on `0.2.2-rc.1`.
 
 **Where is my data stored?**
 Preferences and timer state live in browser `localStorage` under `llm.companion.v2` and are never uploaded. The session radar only reads local DSH state.

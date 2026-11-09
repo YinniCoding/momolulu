@@ -1,6 +1,6 @@
 {
   "name": "momolulu",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "type": "module",
   "description": "momolulu, a gentle coding companion with scenic backgrounds, live session activity, focus timing and wellbeing nudges.",
   "exports": {
@@ -67,7 +67,7 @@
     "check": "node --check client.js && node --check index.js"
   },
   "engines": {
-    "dsh": "0.2.2-rc.1"
+    "dsh": ">=0.2.1-rc.5 <0.3.0 || >=0.2.2-rc.1 <0.3.0"
   },
   "disclosure": {
     "cloud": true,

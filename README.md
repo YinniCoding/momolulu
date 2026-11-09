@@ -27,7 +27,7 @@ dsh plugin --profile web add momolulu
 
 ## 安装
 
-面向 **DSH 0.2.2-rc.1**，其他版本尚未验证。
+面向 **DSH 0.2.1-rc.5 至 0.2.x**；主要在 0.2.2-rc.1 上验证，更早的 0.2.x 未逐一测试。
 
 已发布到 npm，推荐一行安装（把 `web` 换成你的 profile 名）：
 
@@ -84,7 +84,7 @@ https://raw.githubusercontent.com/YinniCoding/momolulu/main/market.json
 这是一个可选仪式感。全屏失败不影响计时；按 Esc 只退出全屏，计时继续。
 
 **支持哪些 DSH 版本？**
-目前声明并验证的是 `0.2.2-rc.1`，其他版本未验证。
+声明支持 `>=0.2.1-rc.5 <0.3.0`；主要在 `0.2.2-rc.1` 上验证。
 
 **数据存在哪里？**
 偏好与计时存在浏览器 `localStorage` 的 `llm.companion.v2`，不上传；会话雷达只读取 DSH 本地状态。
