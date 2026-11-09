@@ -153,6 +153,15 @@ test('chime preference defaults to off and is restored', () => {
   assert.equal(clock({ sound: true }).getSnapshot().sound, true);
 });
 
+
+test('slow drift defaults on, chime defaults off, and neither forces the other', () => {
+  const c = clock();
+  assert.equal(c.getSnapshot().drift, true);
+  assert.equal(c.getSnapshot().sound, false);
+  assert.equal(clock({ drift: false, sound: true }).getSnapshot().drift, false);
+  assert.equal(clock({ drift: false, sound: true }).getSnapshot().sound, true);
+});
+
 test('running deadline and preferences restore without touching old timer keys', () => {
   const c = clock(); c.start(); c.advance(60000);
   const restored = clock(c.getSnapshot());
