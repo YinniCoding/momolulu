@@ -127,21 +127,26 @@ window.__ModuleLoader__.load({
     }
     function playChime() {
       const audio = ensureAudio();
-      if (!audio || audio.state !== 'running') return;
-      const start = audio.currentTime;
-      [660, 880].forEach((frequency, index) => {
-        const oscillator = audio.createOscillator();
-        const gain = audio.createGain();
-        const at = start + index * 0.18;
-        oscillator.type = 'sine';
-        oscillator.frequency.value = frequency;
-        gain.gain.setValueAtTime(0, at);
-        gain.gain.linearRampToValueAtTime(0.12, at + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
-        oscillator.connect(gain).connect(audio.destination);
-        oscillator.start(at);
-        oscillator.stop(at + 0.4);
-      });
+      if (!audio) return;
+      const emit = () => {
+        const start = audio.currentTime;
+        [660, 880].forEach((frequency, index) => {
+          const oscillator = audio.createOscillator();
+          const gain = audio.createGain();
+          const at = start + index * 0.18;
+          oscillator.type = 'sine';
+          oscillator.frequency.value = frequency;
+          gain.gain.setValueAtTime(0, at);
+          gain.gain.linearRampToValueAtTime(0.12, at + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
+          oscillator.connect(gain).connect(audio.destination);
+          oscillator.start(at);
+          oscillator.stop(at + 0.4);
+        });
+      };
+      // The first chime often runs while the context is still suspended; wait for it.
+      if (audio.state === 'running') emit();
+      else Promise.resolve(audio.resume()).then(emit).catch(() => {});
     }
     function tick(now = Date.now()) {
       const patch = { now };
@@ -401,9 +406,9 @@ window.__ModuleLoader__.load({
             h('div', { className: 'llm-sub', style: { marginTop: 10 } }, `${t('elapsed')} · ${formatTime(total - remaining)}`)),
           h('details', { className: 'llm-disclosure' }, h('summary', null, `${t('reminderSettings')} · ${t(model.reminders && !todayPaused ? 'on' : 'off')}`),
             h('div', { className: 'llm-settings' }, button(t(model.reminders && !todayPaused ? 'on' : 'off'), () => setReminders(!model.reminders || todayPaused), { role: 'switch', 'aria-checked': model.reminders && !todayPaused })),
-            h('div', { className: 'llm-settings' }, button(t(model.sound ? 'soundOn' : 'soundOff'), () => { update({ sound: !model.sound }); if (!model.sound) ensureAudio(); }, { role: 'switch', 'aria-checked': model.sound })),
+            h('div', { className: 'llm-settings' }, button(t(model.sound ? 'soundOn' : 'soundOff'), () => { const next = !model.sound; update({ sound: next }); if (next) playChime(); }, { role: 'switch', 'aria-checked': model.sound })),
             h('div', { className: 'llm-summary' }, t('reminderEvery')),
-            button(t('testReminder'), () => { const now = Date.now(); update({ now, previewAt: now, previewUntil: now + 8000 }, false); setOpen(false); if (panelMode) layout.selectPanel(null); }),
+            button(t('testReminder'), () => { const now = Date.now(); update({ now, previewAt: now, previewUntil: now + 8000 }, false); if (state.sound) playChime(); setOpen(false); if (panelMode) layout.selectPanel(null); }),
             h('div', { className: 'llm-summary' }, reminderLabel(model))),
           model.notice && h('div', { className: 'llm-notice', role: 'status' }, t(model.notice), h('div', { className: 'llm-controls' }, button(t('got'), () => update({ notice: '' })), model.status === 'running' && button(t('snooze'), () => update({ notice: '', nextReminder: Date.now() + 10 * 60000 })), button(t('today'), () => update({ notice: '', pausedDate: new Date().toDateString() })))),
           h('details', { className: 'llm-disclosure' }, h('summary', null, `${t('radar')} · ${radarSummary}`),
