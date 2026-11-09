@@ -458,13 +458,21 @@ window.__ModuleLoader__.load({
         ctx.inject(['commandUi'], (scope) => {
           const commandUi = scope.get('commandUi');
           if (commandUi === undefined) return;
-          scope.effect(() => commandUi.register({
-            name: 'focus',
-            label: () => t('focusCommand'),
-            description: () => t('focusCommandHint'),
-            available: () => true,
-            ui: { kind: 'action', run: () => { if (state.status === 'running') pause(); else startFocused(); } },
-          }), 'momolulu /focus command');
+          scope.effect(() => {
+            try {
+              return commandUi.register({
+                name: 'focus',
+                label: () => t('focusCommand'),
+                description: () => t('focusCommandHint'),
+                available: () => true,
+                ui: { kind: 'action', run: () => { if (state.status === 'running') pause(); else startFocused(); } },
+              });
+            } catch (error) {
+              // A host /focus command or another plugin may already own the name; the widget still works without it.
+              console.warn('momolulu: /focus command unavailable', error);
+              return () => {};
+            }
+          }, 'momolulu /focus command');
         });
         ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({ name: 'sidebar.panellist', id: 'lumululu-mei', order: 18, label: () => t('title') }, Icon));
         ctx.slots.inject('main', () => ctx.slots.register({ name: 'main', key: 'lumululu-mei' }, (props) => h(Companion, { ...props, panelMode: true })));
