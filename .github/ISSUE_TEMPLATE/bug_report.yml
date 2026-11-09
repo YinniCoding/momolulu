@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in momolulu does not work as described.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please do not paste API keys, tokens, session transcripts, or personal file paths.
+  - type: input
+    id: version
+    attributes:
+      label: momolulu version
+      description: Shown in DSH's plugin list, or run `npm view momolulu version`.
+    validations:
+      required: true
+  - type: input
+    id: dsh
+    attributes:
+      label: DSH version and platform
+      placeholder: 0.2.2-rc.1, macOS 15.1 desktop / dsh web
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the companion panel
+        2. Start a 25-minute focus
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Include any console error text. Remove personal data first.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed credentials, email addresses, session titles and personal paths.
+          required: true
+        - label: I checked the README's known limitations.
+          required: true

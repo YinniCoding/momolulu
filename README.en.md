@@ -72,6 +72,26 @@ This is a **maintainer-hosted index**, not a claim of inclusion in a central or 
 
 See [PRIVACY.md](PRIVACY.md). The plugin has no developer backend and no plugin analytics. Weather makes third-party requests; preferences and timer data stay in browser storage; location is optional.
 
+## FAQ
+
+**Why do momolulu and lumululu-mei conflict?**
+They are two versions of the same plugin and would render the same companion twice. Disable or uninstall `@local/lumululu-mei` before enabling `momolulu`.
+
+**Why is the weather city Nanjing by default?**
+The default coordinates are Nanjing (32.06, 118.80). Location is requested only after you click "Use my location", and a page refresh returns to Nanjing.
+
+**Why does starting focus request fullscreen?**
+It is an optional bit of ceremony. A denied fullscreen request does not affect the timer, and Esc exits fullscreen without stopping it.
+
+**Which DSH versions are supported?**
+`0.2.2-rc.1` is the version declared and verified. Others are untested.
+
+**Where is my data stored?**
+Preferences and timer state live in browser `localStorage` under `llm.companion.v2` and are never uploaded. The session radar only reads local DSH state.
+
+**How do I uninstall?**
+Remove `momolulu` through the DSH plugin manager. To also clear preferences, delete that localStorage key manually.
+
 ## Known limitations
 
 - The radar lists ordinary conversations only, not child-agent conversations. "Ended" does not imply successful execution, and the unread state is page-local and may be lost on refresh.

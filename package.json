@@ -1,6 +1,6 @@
 {
   "name": "momolulu",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "type": "module",
   "description": "momolulu, a gentle coding companion with scenic backgrounds, live session activity, focus timing and wellbeing nudges.",
   "exports": {
@@ -49,11 +49,18 @@
     "url": "https://github.com/YinniCoding/momolulu/issues"
   },
   "keywords": [
-    "dsh",
+    "companion",
+    "cordis-plugin",
     "deepseek-harness",
-    "plugin",
+    "dsh",
+    "dsh-plugin",
     "focus",
-    "companion"
+    "focus-timer",
+    "plugin",
+    "pomodoro",
+    "productivity",
+    "reminder",
+    "wellbeing"
   ],
   "scripts": {
     "test": "node --test focus.test.mjs fullscreen.test.mjs",
