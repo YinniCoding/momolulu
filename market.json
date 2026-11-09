@@ -37,15 +37,15 @@
       },
       "versions": [
         {
-          "version": "1.0.16",
-          "publishTimestamp": 1794193197,
+          "version": "1.0.18",
+          "publishTimestamp": 1794205675,
           "engines": {
             "dsh": ">=0.2.1-rc.5 <0.3.0 || >=0.2.2-rc.1 <0.3.0"
           },
           "source": {
             "type": "git",
             "url": "https://github.com/YinniCoding/momolulu",
-            "commit": "ae26254d33c7a8718968b50c96c9f0d3848d5933"
+            "commit": "665d4f9603a081062ca7cb511fd2ce74df76663d"
           }
         }
       ]
