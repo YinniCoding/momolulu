@@ -51,7 +51,8 @@ test('break reminder, snooze, reminders off and reset', () => {
   c.advance(9 * 60000); assert.equal(c.getSnapshot().notice, '');
   c.advance(60000); assert.equal(c.getSnapshot().notice, 'break');
   c.update({ reminders: false, notice: '' }); c.advance(15 * 60000);
-  assert.equal(c.getSnapshot().status, 'done'); assert.equal(c.getSnapshot().notice, '');
+  // Completion is announced even with reminders off; only the 20-minute nudges stop.
+  assert.equal(c.getSnapshot().status, 'done'); assert.equal(c.getSnapshot().notice, 'finish');
   c.reset(15); assert.equal(c.getSnapshot().remaining, 15 * 60000);
 });
 test('reminder attention timestamp is stable across ticks and renews after snooze', () => {
