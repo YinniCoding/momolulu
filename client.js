@@ -285,7 +285,7 @@ window.__ModuleLoader__.load({
       .llm-primary{flex:1;font-weight:700;background:color-mix(in srgb,var(--dsw-alias-brand-primary) 17%,var(--dsw-alias-bg-layer-2));border-color:var(--dsw-alias-brand-primary)}
       .llm-photo{position:relative;display:block;width:196px;height:238px;overflow:hidden;border:2px solid var(--dsw-alias-border-l2);border-radius:26px;padding:0;cursor:pointer;pointer-events:auto;background:var(--dsw-alias-bg-layer-1);box-shadow:0 12px 40px color-mix(in srgb,var(--dsw-alias-label-primary) 20%,transparent)}
       .llm-photo img{width:100%;height:100%;object-fit:cover;object-position:73% 80%;filter:brightness(1.12);transition:transform .6s}
-      .llm-photo:hover img{transform:scale(1.06)}.llm-stack{display:flex;flex-direction:column;align-items:flex-end;gap:7px}.llm-drift{--llm-drift: calc(100% + 112px - 100vh);animation:llm-drift 58s cubic-bezier(.45,0,.55,1) infinite alternate;will-change:transform}@supports (height: 100dvh){.llm-drift{--llm-drift: calc(100% + 112px - 100dvh)}}.llm-drift:hover,.llm-drift:has(:focus-visible),.llm-drift:has(.llm-card){animation-play-state:paused}
+      .llm-photo:hover img{transform:scale(1.06)}.llm-stack{display:flex;flex-direction:column;align-items:flex-end;gap:7px}.llm-drift{animation:llm-drift 58s cubic-bezier(.45,0,.55,1) infinite alternate;will-change:transform}.llm-drift:hover,.llm-drift:has(:focus-visible),.llm-drift:has(.llm-card){animation-play-state:paused}
       .llm-photo-caption{position:absolute;inset:12px 10px auto;padding:0;border:0;background:transparent;color:#fff;text-shadow:0 1px 4px #000,0 0 12px #000;text-align:left;pointer-events:none}.llm-photo-caption .llm-sub{color:inherit}.llm-status-line{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.llm-next-inline{font-size:11px;font-variant-numeric:tabular-nums}.llm-photo-caption .llm-status-line{display:grid;grid-template-columns:1fr;gap:2px;margin-top:4px;text-align:left}.llm-photo-caption .llm-sub,.llm-photo-caption .llm-next-inline,.llm-weather-mini{max-width:100%;text-align:left;font:500 11px/1.45 system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0}.llm-weather-mini{margin-top:4px}.llm-photo-name{font-size:12px}.llm-background-adjust{margin-top:14px;border-top:1px solid var(--dsw-alias-border-l1);padding-top:10px}.llm-background-adjust summary{cursor:pointer;font-weight:650}.llm-background-adjust label{display:grid;grid-template-columns:100px 1fr 45px;align-items:center;gap:8px;margin-top:12px}.llm-background-adjust input{width:100%;accent-color:var(--dsw-alias-brand-primary)}.llm-weather-panel{margin:12px 0;padding:10px;border:1px solid var(--dsw-alias-border-l1);border-radius:12px}.llm-weather-panel a{color:var(--dsw-alias-label-secondary)}
       .llm-photo-name{display:flex;justify-content:space-between;align-items:center;font-weight:750}.llm-mini-clock{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:4px}
       .llm-focus{padding:18px 14px;border:1px solid var(--dsw-alias-border-l1);border-radius:20px;background:var(--dsw-alias-bg-layer-2);text-align:center}
@@ -300,7 +300,7 @@ window.__ModuleLoader__.load({
       .llm-radar-trigger{pointer-events:auto;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 9px;border:1px solid var(--dsw-alias-border-l1);border-radius:12px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);cursor:pointer;font-size:11px!important}.llm-radar-badge{position:absolute;right:-5px;top:-9px;z-index:2;min-width:27px;max-width:48px;min-height:27px;border-radius:999px;font-weight:700!important}.llm-radar-panel{position:absolute;right:0;z-index:30;max-height:min(64vh,520px);width:min(320px,calc(100vw - 32px));max-height:min(440px,calc(100dvh - 130px));overflow:auto;padding:14px;border:1px solid var(--dsw-alias-border-l2);border-radius:18px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);pointer-events:auto;box-shadow:0 12px 40px color-mix(in srgb,var(--dsw-alias-label-primary) 15%,transparent)}.llm-radar-group{margin:10px 0}.llm-radar-label{font-size:12px;font-weight:650;margin-bottom:5px}.llm-radar-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:9px 7px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--dsw-alias-border-l1);border-radius:6px;color:var(--dsw-alias-label-primary);cursor:pointer}.llm-radar-row:hover{background:var(--dsw-alias-bg-layer-2)}.llm-radar-row-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .llm-reminder-button{display:block;width:100%;padding:0;background:transparent;border:0;color:inherit;cursor:pointer;text-align:left}.llm-alert-highlight{color:var(--dsw-alias-label-primary)!important;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 24%,var(--dsw-alias-bg-layer-1));border-left:3px solid var(--dsw-alias-state-warn-primary);border-radius:6px;padding:6px 8px!important;font-weight:700!important;white-space:normal!important;text-shadow:none}.llm-alert-actions{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}.llm-alert-actions .llm-btn{font-size:10px;padding:4px 6px}.llm-alert-shake{animation:llm-nudge .75s ease-in-out 2;transform-origin:center bottom}@keyframes llm-nudge{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-4px) rotate(-2deg)}40%{transform:translateX(4px) rotate(2deg)}60%{transform:translateX(-3px) rotate(-1deg)}80%{transform:translateX(2px) rotate(1deg)}}@media(prefers-reduced-motion:reduce){.llm-alert-shake{animation:none}}
       .llm-radar-panel[data-placement='above']{bottom:calc(100% + 8px)}.llm-radar-panel[data-placement='below']{top:calc(100% + 8px)}.llm-radar-attention{border-color:var(--dsw-alias-state-warn-primary)!important;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 22%,var(--dsw-alias-bg-overlay))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-warn-primary) 18%,transparent)}.llm-radar-kind{display:block;color:var(--dsw-alias-state-warn-primary);font-size:11px;font-weight:600;margin-top:2px}
-      @keyframes llm-drift{from{transform:translateY(0)}to{transform:translateY(var(--llm-drift))}}
+      @keyframes llm-drift{from{transform:translateY(0)}to{transform:translateY(var(--llm-drift-px, 0px))}}
       @media(prefers-reduced-motion:reduce){.llm-drift{animation:none}.llm-photo img{transition:none}}
       @media(max-width:600px){.llm-floating{right:12px;bottom:12px}.llm-photo{width:168px;height:212px}.llm-float-widget{width:168px}.llm-photo-clean{width:168px;height:150px}.llm-card{width:min(370px,calc(100vw - 24px));max-height:calc(100dvh - 48px)}.llm-panel{padding:64px 12px 12px}.llm-clock{font-size:54px}}
     `;
@@ -313,6 +313,8 @@ window.__ModuleLoader__.load({
       const [navigationError, setNavigationError] = React.useState('');
       const [radarPlacement, setRadarPlacement] = React.useState(null);
       const radarTrigger = React.useRef(null);
+      const stackRef = React.useRef(null);
+      const [driftPx, setDriftPx] = React.useState(0);
       const radarPanel = React.useRef(null);
       const radarId = React.useId();
       React.useEffect(() => {
@@ -362,6 +364,17 @@ window.__ModuleLoader__.load({
           h(React.Fragment, null, h('span', { className: 'llm-radar-row-title' }, row.displayTitle || row.id, row.attentionKind && h('small', { className: 'llm-radar-kind' }, t(row.attentionKind))), h('span', { 'aria-hidden': true }, '↗')),
           () => navigate(row), { key: row.id, className: 'llm-radar-row', title: `${row.displayTitle || row.id}${row.cwd ? '\n' + row.cwd : ''}` })));
       const drifting = model.drift && !panelMode;
+      React.useEffect(() => {
+        if (!drifting) { setDriftPx(0); return undefined; }
+        const measure = () => {
+          const height = stackRef.current?.getBoundingClientRect().height ?? 0;
+          const travel = Math.round(height + 136 - window.innerHeight);
+          setDriftPx(Math.min(0, travel));
+        };
+        measure();
+        window.addEventListener('resize', measure);
+        return () => window.removeEventListener('resize', measure);
+      }, [drifting, expanded, model.minimized]);
       return h('div', { className: `llm-root ${panelMode ? 'llm-panel' : 'llm-floating'}`, onPointerDownCapture: () => { if (model.sound) ensureAudio(); } },
         h('style', null, css),
         model.bgOn && h('div', { className: 'llm-bg' + (model.readingProtection && !panelMode ? ' llm-bg-protected' : ''), style: { backgroundImage: `url("${asset(currentScene.name)}")`, opacity: model.intensity / 100, filter: `brightness(${model.brightness / 100}) saturate(1.12)` } }),
@@ -373,7 +386,7 @@ window.__ModuleLoader__.load({
           !radarCount && h('div', { className: 'llm-sub' }, t(catalog.phase === 'ready' ? 'radarEmpty' : 'connecting')),
           (groups.running.length > 3 || groups.unread.length > 3 || groups.waiting.length > 3) && button(t(showAll ? 'showLess' : 'showAll'), () => setShowAll(!showAll)),
           navigationError && h('div', { role: 'status', className: 'llm-sub' }, navigationError), h('div', { className: 'llm-summary' }, t('radarHint'))),
-        h('div', { className: 'llm-stack' + (drifting ? ' llm-drift' : '') },
+        h('div', { ref: stackRef, className: 'llm-stack' + (drifting ? ' llm-drift' : ''), style: drifting ? { '--llm-drift-px': `${driftPx}px` } : undefined },
         !panelMode && h('button', { type: 'button', ref: radarTrigger, className: 'llm-radar-trigger' + (radarHighlight ? ' llm-radar-attention' : '') + (radarShake ? ' llm-alert-shake' : '') + (model.minimized && !expanded ? ' llm-radar-badge' : ''), onClick: () => {
             const next = !radarOpen;
             if (next && radarTrigger.current) {
