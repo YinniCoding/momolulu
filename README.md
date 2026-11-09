@@ -1,120 +1,53 @@
 # momolulu
 
-给 DeepSeek Harness（DSH）的一点温柔陪伴：照片背景、专注计时、休息提醒、天气，以及跨会话的「会话雷达」。
+给 DeepSeek Harness 加一张会陪你的照片：专注计时、喝水提醒、天气，还有能看到哪个会话跑完的会话雷达。
 
 **中文** | [English](README.en.md)
 
-[![npm version](https://img.shields.io/npm/v/momolulu.svg)](https://www.npmjs.com/package/momolulu)
-[![npm downloads](https://img.shields.io/npm/dm/momolulu.svg)](https://www.npmjs.com/package/momolulu)
+[![npm](https://img.shields.io/npm/v/momolulu.svg)](https://www.npmjs.com/package/momolulu)
+[![downloads](https://img.shields.io/npm/dm/momolulu.svg)](https://www.npmjs.com/package/momolulu)
 [![license](https://img.shields.io/npm/l/momolulu.svg)](LICENSE)
-[![Publish](https://github.com/YinniCoding/momolulu/actions/workflows/publish.yml/badge.svg)](https://github.com/YinniCoding/momolulu/actions/workflows/publish.yml)
 
 ```sh
 dsh plugin --profile web add momolulu
 ```
 
-![momolulu 概览：DSH 聊天界面与右下角照片陪伴](docs/overview.webp)
+![momolulu 概览](docs/overview.webp)
 
-## 功能
+## 它做什么
 
-- **照片陪伴**：右下角照片卡片，轻微浮动与缓慢呼吸动效；可收成带进度环和倒计时的小头像。
-- **专注计时**：15 / 25 / 45 / 60 分钟可选，暂停、继续、重置；开始专注时请求全屏，按 Esc 只退出全屏、不打断计时。
-- **休息提醒**：默认每 20 分钟提示喝水 / 站立，到点轻晃并高亮提醒行，可「收到」或「10 分钟后提醒」；提供 8 秒测试预览。
-- **会话雷达**：列出运行中、刚结束待查看、等待输入、请求权限的普通会话，点击整行直接跳转；不会自动切换、不会代答或授予权限。
-- **天气**：默认南京，经 Open-Meteo 查询；只有你主动点击「使用当前位置」时才请求定位。
-- **阅读保护**：默认减弱聊天区域的背景干扰，右侧保留景色；背景亮度与浓度可调。
-- 中英文界面文案，支持系统「减少动态效果」。
+- **照片陪伴**：右下角一张风景照，轻微浮动；可缩成带倒计时的小头像。
+- **专注计时**：15/25/45/60 分钟，可暂停。开始时可全屏，Esc 退出全屏但不停表。
+- **休息提醒**：每 20 分钟提示喝水、起来活动，到点轻晃一下并高亮。
+- **会话雷达**：列出运行中、刚结束、等待输入、请求权限的会话，点一下就跳过去。
+- **天气**：Open-Meteo，默认南京；点「使用当前位置」才会请求定位。
+
+开始专注会请求全屏，这是可选的氛围；被拒绝也不影响计时。
 
 ## 安装
 
-面向 **DSH 0.2.1-rc.5 至 0.2.x**；主要在 0.2.2-rc.1 上验证，更早的 0.2.x 未逐一测试。
-
-已发布到 npm，推荐一行安装（把 `web` 换成你的 profile 名）：
-
 ```sh
 dsh plugin --profile web add momolulu
 ```
 
-桌面版也可以在 **插件 → 添加插件** 里直接填 `momolulu`。
+桌面版：**插件 → 添加插件 → 输入 `momolulu`**，装完重启一次。
 
-需要锁定版本时，可用 GitHub Release 说明里固定到 commit 的 Git 地址；也可以克隆本仓库，把目录绝对路径交给 DSH 插件管理器。**不需要另外启动 Web 服务。**
-
-> **已经在用旧本地包的用户**：启用 `momolulu` 前，请先停用或卸载 `@local/lumululu-mei`，两者会同时渲染同一个陪伴组件。浏览器本地存储键 `llm.companion.v2` 保持不变，同一页面源下偏好与计时数据可以延续；需要回滚时请先备份。
-
-### 从 npm 安装
-
-```sh
-npm install -g momolulu
-```
-
-这适合自己管理全局包的场景；DSH 里更推荐上面的 `dsh plugin add`。
-
-### 加入 Discover 插件源
-
-如果你的 DSH 配置启用了可选的插件市场 Discover，可添加这个自建索引地址：
-
-```
-https://raw.githubusercontent.com/YinniCoding/momolulu/main/market.json
-```
-
-这是**维护者自建的索引**，不代表已进入某个中心化或官方市场。索引固定到发布 commit，尚未发布到 npm。
-
-## 使用
-
-- 点击照片展开专注面板；倒计时旁的按钮可直接开始 / 暂停，不必展开面板。
-- 点 `−` 收成小头像，点小头像恢复照片。
-- 展开「提醒设置 → 测试提醒（8 秒）」，可预览晃动与高亮，不影响真实提醒时间。
-- 点雷达摘要或小头像角标查看其他会话；点整行进入对应对话。
-- 展开「外观设置」可切换场景、动效、阅读保护，调整背景亮度与浓度。
-- 暂停、计时结束或插件卸载都不会强制退出全屏；只有 Esc 或「退出全屏」会退出。
+> 换装前请先停用旧的 `@local/lumululu-mei`，两者会同时渲染。
 
 ## 隐私
 
-见 [PRIVACY.md](PRIVACY.md)。插件没有开发者后台，也没有插件统计；天气是第三方请求，偏好与计时保存在浏览器本地，定位可选。
-
-## 常见问题
-
-**为什么同时装了 momolulu 和 lumululu-mei 会出问题？**
-两者是同一个插件的前后版本，会同时渲染同一个陪伴组件。启用 `momolulu` 前请先停用或卸载 `@local/lumululu-mei`。
-
-**天气为什么默认是南京？**
-默认坐标固定为南京（32.06, 118.80）。点「使用当前位置」后才会请求定位，刷新页面会回到南京。
-
-**开始专注为什么要全屏？**
-这是一个可选仪式感。全屏失败不影响计时；按 Esc 只退出全屏，计时继续。
-
-**支持哪些 DSH 版本？**
-声明支持 `>=0.2.1-rc.5 <0.3.0`；主要在 `0.2.2-rc.1` 上验证。
-
-**数据存在哪里？**
-偏好与计时存在浏览器 `localStorage` 的 `llm.companion.v2`，不上传；会话雷达只读取 DSH 本地状态。
-
-**怎么卸载？**
-用 DSH 插件管理器卸载 `momolulu`。需要清空偏好时，再手动删除该 localStorage 项。
+偏好和计时只存在浏览器 `localStorage`，不上传；雷达只读本地会话状态；唯一的网络请求是天气。详见 [PRIVACY.md](PRIVACY.md)。
 
 ## 已知限制
 
-- 雷达只列普通会话，不含子代理会话。「刚结束」不代表执行成功；待查看状态仅在当前页面保留，刷新后可能丢失。
-- 多个窗口之间不共享专注计时状态。
-- 浏览器或 Electron 可能拒绝全屏或定位，这类失败不会阻止计时。
-- 计时与提醒不是系统级闹钟：关闭 DSH 或设备休眠时不会准时触发，恢复后会按截止时间追赶。
-- 天气默认南京；通过定位取得的坐标保留两位小数，且只存在内存中。
-- 自动化测试覆盖计时逻辑、雷达分类与提醒判定、全屏控制（注入测试端口）。跨平台视觉布局、真实全屏、会话跳转与权限事件仍需手动验证。
-- 未内置自动更新；升级请按 DSH 插件管理器支持的方式卸载后重装。
+只支持普通会话（不含子代理）；多窗口不同步计时；计时不是系统闹钟，关掉 DSH 就不会准时触发；未内置自动更新。
 
 ## 开发
 
-本地检查需要 Node.js 20 及以上；无需构建步骤，也没有安装脚本。
-
 ```sh
-npm run check
-npm test
-npm pack --dry-run
+npm run check && npm test
 ```
 
-## 开源许可
+## 许可
 
-- **代码**：[MIT](LICENSE)。
-- **图片素材**（三张场景图、图标与截图）：[CC BY 4.0](LICENSE-ARTWORK.md)，署名「momolulu artwork © 2026 YinniCoding，CC BY 4.0」。
-
-天气数据来自 [Open-Meteo](https://open-meteo.com/)（CC BY 4.0）。与 DeepSeek 及角色权利方无隶属关系，详见 [NOTICE.md](NOTICE.md)。
+代码 [MIT](LICENSE)；图片素材 [CC BY 4.0](LICENSE-ARTWORK.md)。天气数据来自 [Open-Meteo](https://open-meteo.com/)，与 DeepSeek 无隶属关系。
