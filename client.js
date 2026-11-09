@@ -285,7 +285,7 @@ window.__ModuleLoader__.load({
       .llm-primary{flex:1;font-weight:700;background:color-mix(in srgb,var(--dsw-alias-brand-primary) 17%,var(--dsw-alias-bg-layer-2));border-color:var(--dsw-alias-brand-primary)}
       .llm-photo{position:relative;display:block;width:196px;height:238px;overflow:hidden;border:2px solid var(--dsw-alias-border-l2);border-radius:26px;padding:0;cursor:pointer;pointer-events:auto;background:var(--dsw-alias-bg-layer-1);box-shadow:0 12px 40px color-mix(in srgb,var(--dsw-alias-label-primary) 20%,transparent)}
       .llm-photo img{width:100%;height:100%;object-fit:cover;object-position:73% 80%;filter:brightness(1.12);transition:transform .6s}
-      .llm-photo:hover img{transform:scale(1.06)}.llm-stack{display:flex;flex-direction:column;align-items:flex-end;gap:7px}.llm-drift{animation:llm-drift 58s linear infinite alternate;will-change:transform}.llm-drift:hover,.llm-drift:has(:focus-visible),.llm-drift:has(.llm-card){animation-play-state:paused}
+      .llm-photo:hover img{transform:scale(1.06)}.llm-stack{position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:7px}.llm-drift{animation:llm-drift 58s linear infinite alternate;will-change:transform}.llm-drift:hover,.llm-drift:has(:focus-visible),.llm-drift:has(.llm-card){animation-play-state:paused}
       .llm-photo-caption{position:absolute;inset:12px 10px auto;padding:0;border:0;background:transparent;color:#fff;text-shadow:0 1px 4px #000,0 0 12px #000;text-align:left;pointer-events:none}.llm-photo-caption .llm-sub{color:inherit}.llm-status-line{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.llm-next-inline{font-size:11px;font-variant-numeric:tabular-nums}.llm-photo-caption .llm-status-line{display:grid;grid-template-columns:1fr;gap:2px;margin-top:4px;text-align:left}.llm-photo-caption .llm-sub,.llm-photo-caption .llm-next-inline,.llm-weather-mini{max-width:100%;text-align:left;font:500 11px/1.45 system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0}.llm-weather-mini{margin-top:4px}.llm-photo-name{font-size:12px}.llm-background-adjust{margin-top:14px;border-top:1px solid var(--dsw-alias-border-l1);padding-top:10px}.llm-background-adjust summary{cursor:pointer;font-weight:650}.llm-background-adjust label{display:grid;grid-template-columns:100px 1fr 45px;align-items:center;gap:8px;margin-top:12px}.llm-background-adjust input{width:100%;accent-color:var(--dsw-alias-brand-primary)}.llm-weather-panel{margin:12px 0;padding:10px;border:1px solid var(--dsw-alias-border-l1);border-radius:12px}.llm-weather-panel a{color:var(--dsw-alias-label-secondary)}
       .llm-photo-name{display:flex;justify-content:space-between;align-items:center;font-weight:750}.llm-mini-clock{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:4px}
       .llm-focus{padding:18px 14px;border:1px solid var(--dsw-alias-border-l1);border-radius:20px;background:var(--dsw-alias-bg-layer-2);text-align:center}
@@ -378,14 +378,7 @@ window.__ModuleLoader__.load({
       return h('div', { className: `llm-root ${panelMode ? 'llm-panel' : 'llm-floating'}`, onPointerDownCapture: () => { if (model.sound) ensureAudio(); } },
         h('style', null, css),
         model.bgOn && h('div', { className: 'llm-bg' + (model.readingProtection && !panelMode ? ' llm-bg-protected' : ''), style: { backgroundImage: `url("${asset(currentScene.name)}")`, opacity: model.intensity / 100, filter: `brightness(${model.brightness / 100}) saturate(1.12)` } }),
-        !panelMode && radarOpen && h('section', { ref: radarPanel, id: radarId, className: 'llm-radar-panel', 'data-placement': radarPlacement?.side || 'above', style: radarPlacement ? { maxHeight: radarPlacement.maxHeight } : undefined, 'aria-label': t('radar'), onKeyDown: (event) => { if (event.key === 'Escape') { event.stopPropagation(); closeRadar(); } }, onBlur: (event) => { if (!event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== radarTrigger.current) setRadarOpen(false); } },
-          h('header', { className: 'llm-head' }, h('strong', null, t('radar')), button(t('close'), closeRadar, { className: 'llm-btn llm-actions' })),
-          groups.waiting.length > 0 && renderGroup(t('radarWaiting'), groups.waiting),
-          groups.running.length > 0 && renderGroup(t('radarRunning'), groups.running),
-          groups.unread.length > 0 && renderGroup(t('radarUnread'), groups.unread),
-          !radarCount && h('div', { className: 'llm-sub' }, t(catalog.phase === 'ready' ? 'radarEmpty' : 'connecting')),
-          (groups.running.length > 3 || groups.unread.length > 3 || groups.waiting.length > 3) && button(t(showAll ? 'showLess' : 'showAll'), () => setShowAll(!showAll)),
-          navigationError && h('div', { role: 'status', className: 'llm-sub' }, navigationError), h('div', { className: 'llm-summary' }, t('radarHint'))),
+
         h('div', { ref: stackRef, className: 'llm-stack' + (drifting ? ' llm-drift' : ''), style: drifting ? { '--llm-drift-px': `${driftPx}px` } : undefined },
         !panelMode && h('button', { type: 'button', ref: radarTrigger, className: 'llm-radar-trigger' + (radarHighlight ? ' llm-radar-attention' : '') + (radarShake ? ' llm-alert-shake' : '') + (model.minimized && !expanded ? ' llm-radar-badge' : ''), onClick: () => {
             const next = !radarOpen;
@@ -399,6 +392,14 @@ window.__ModuleLoader__.load({
             setRadarOpen(next);
             setRadarAttentionAt(0);
           }, 'aria-expanded': radarOpen, 'aria-controls': radarId, 'aria-label': `${t('radar')} · ${radarSummary}`, title: radarSummary + (radarHighlight ? ' · ' + t('radarSoftHint') : '') }, model.minimized && !expanded ? (radarCount > 99 ? '99+' : radarCount || '☷') : `☷ ${radarSummary}`),
+        !panelMode && radarOpen && h('section', { ref: radarPanel, id: radarId, className: 'llm-radar-panel', 'data-placement': radarPlacement?.side || 'above', style: radarPlacement ? { maxHeight: radarPlacement.maxHeight } : undefined, 'aria-label': t('radar'), onKeyDown: (event) => { if (event.key === 'Escape') { event.stopPropagation(); closeRadar(); } }, onBlur: (event) => { if (!event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== radarTrigger.current) setRadarOpen(false); } },
+          h('header', { className: 'llm-head' }, h('strong', null, t('radar')), button(t('close'), closeRadar, { className: 'llm-btn llm-actions' })),
+          groups.waiting.length > 0 && renderGroup(t('radarWaiting'), groups.waiting),
+          groups.running.length > 0 && renderGroup(t('radarRunning'), groups.running),
+          groups.unread.length > 0 && renderGroup(t('radarUnread'), groups.unread),
+          !radarCount && h('div', { className: 'llm-sub' }, t(catalog.phase === 'ready' ? 'radarEmpty' : 'connecting')),
+          (groups.running.length > 3 || groups.unread.length > 3 || groups.waiting.length > 3) && button(t(showAll ? 'showLess' : 'showAll'), () => setShowAll(!showAll)),
+          navigationError && h('div', { role: 'status', className: 'llm-sub' }, navigationError), h('div', { className: 'llm-summary' }, t('radarHint'))),
 
         !expanded ? model.minimized ? h('button', {
           type: 'button', className: 'llm-bubble' + (alertShake || radarShake ? ' llm-alert-shake' : ''), key: `bubble-${Math.max(attentionAt, radarAttentionAt)}`, onClick: () => update({ minimized: false }),
