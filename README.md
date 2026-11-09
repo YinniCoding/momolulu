@@ -4,6 +4,15 @@
 
 **中文** | [English](README.en.md)
 
+[![npm version](https://img.shields.io/npm/v/momolulu.svg)](https://www.npmjs.com/package/momolulu)
+[![npm downloads](https://img.shields.io/npm/dm/momolulu.svg)](https://www.npmjs.com/package/momolulu)
+[![license](https://img.shields.io/npm/l/momolulu.svg)](LICENSE)
+[![Publish](https://github.com/YinniCoding/momolulu/actions/workflows/publish.yml/badge.svg)](https://github.com/YinniCoding/momolulu/actions/workflows/publish.yml)
+
+```sh
+dsh plugin --profile web add momolulu
+```
+
 ![momolulu 概览：DSH 聊天界面与右下角照片陪伴](docs/overview.webp)
 
 ## 功能

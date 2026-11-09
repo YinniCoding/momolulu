@@ -4,6 +4,15 @@ A gentle companion for DeepSeek Harness (DSH): scenic photos, a focus timer, wel
 
 [中文](README.md) | **English**
 
+[![npm version](https://img.shields.io/npm/v/momolulu.svg)](https://www.npmjs.com/package/momolulu)
+[![npm downloads](https://img.shields.io/npm/dm/momolulu.svg)](https://www.npmjs.com/package/momolulu)
+[![license](https://img.shields.io/npm/l/momolulu.svg)](LICENSE)
+[![Publish](https://github.com/YinniCoding/momolulu/actions/workflows/publish.yml/badge.svg)](https://github.com/YinniCoding/momolulu/actions/workflows/publish.yml)
+
+```sh
+dsh plugin --profile web add momolulu
+```
+
 ![momolulu overview: the DSH chat surface with the companion photo in the lower right](docs/overview.webp)
 
 ## Features
