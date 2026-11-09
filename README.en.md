@@ -20,9 +20,25 @@ A gentle companion for DeepSeek Harness (DSH): scenic photos, a focus timer, wel
 
 Built for **DSH 0.2.2-rc.1**; other versions are not yet verified.
 
-In DSH's plugin installer, use the commit-pinned Git specification from the GitHub release notes. You can also clone this repository and hand its absolute directory to DSH's plugin manager as a bundle. **No separate web server is needed.**
+Published on npm. Install it in one line (replace `web` with your profile name):
+
+```sh
+dsh plugin --profile web add momolulu
+```
+
+Desktop builds can also use **Plugins → Add plugin** and enter `momolulu`.
+
+To pin a version, use the commit-pinned Git specification from the GitHub release notes; you can also clone this repository and hand its absolute directory to DSH's plugin manager. **No separate web server is needed.**
 
 > **Already using the older local package?** Disable or uninstall `@local/lumululu-mei` before enabling `momolulu`; both render the same companion. The browser storage key `llm.companion.v2` is unchanged, so preferences and timer data continue on the same page origin. Back up first if you may need to roll back.
+
+### Install from npm
+
+```sh
+npm install -g momolulu
+```
+
+Useful if you manage global packages yourself; inside DSH, prefer `dsh plugin add` above.
 
 ### Add the Discover index
 

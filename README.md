@@ -20,9 +20,25 @@
 
 面向 **DSH 0.2.2-rc.1**，其他版本尚未验证。
 
-在 DSH 的插件安装入口中，使用 GitHub Release 说明里提供的、固定到 commit 的 Git 安装地址。也可以克隆本仓库，把目录的绝对路径交给 DSH 插件管理器作为 bundle 安装。**不需要另外启动 Web 服务。**
+已发布到 npm，推荐一行安装（把 `web` 换成你的 profile 名）：
+
+```sh
+dsh plugin --profile web add momolulu
+```
+
+桌面版也可以在 **插件 → 添加插件** 里直接填 `momolulu`。
+
+需要锁定版本时，可用 GitHub Release 说明里固定到 commit 的 Git 地址；也可以克隆本仓库，把目录绝对路径交给 DSH 插件管理器。**不需要另外启动 Web 服务。**
 
 > **已经在用旧本地包的用户**：启用 `momolulu` 前，请先停用或卸载 `@local/lumululu-mei`，两者会同时渲染同一个陪伴组件。浏览器本地存储键 `llm.companion.v2` 保持不变，同一页面源下偏好与计时数据可以延续；需要回滚时请先备份。
+
+### 从 npm 安装
+
+```sh
+npm install -g momolulu
+```
+
+这适合自己管理全局包的场景；DSH 里更推荐上面的 `dsh plugin add`。
 
 ### 加入 Discover 插件源
 
