@@ -370,7 +370,7 @@ window.__ModuleLoader__.load({
 .llm-radar-trigger .llm-radar-sum{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .llm-radar-live{width:6px;height:6px;border-radius:50%;flex:none;background:var(--dsw-alias-state-idle-primary)}
 .llm-radar-live.on{background:var(--dsw-alias-state-success-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-success-primary) 22%,transparent)}
-.llm-radar-glyph{flex:none;opacity:.75}
+
 .llm-radar-badge{position:absolute;right:-5px;top:-9px;z-index:2;min-width:26px;max-width:48px;min-height:26px;border-radius:999px;font-weight:700!important;justify-content:center;padding:0 6px}
 .llm-radar-attention{border-color:var(--dsw-alias-state-warn-primary)!important;color:var(--dsw-alias-label-primary)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-warn-primary) 16%,transparent)}
 .llm-radar-panel{position:absolute;right:0;z-index:30;width:min(340px,calc(100vw - 32px));max-height:min(64vh,520px);overflow:auto;padding:10px;border:1px solid var(--dsw-alias-border-l2);border-radius:16px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);pointer-events:auto;box-shadow:0 16px 44px color-mix(in srgb,var(--dsw-alias-label-primary) 18%,transparent)}
@@ -501,9 +501,6 @@ window.__ModuleLoader__.load({
             setRadarOpen(next);
             setRadarAttentionAt(0);
           }, 'aria-expanded': radarOpen, 'aria-controls': radarId, 'aria-label': `${t('radar')} · ${radarSummary}`, title: radarSummary + (radarHighlight ? ' · ' + t('radarSoftHint') : '') },
-          h('span', { className: 'llm-radar-glyph', 'aria-hidden': true },
-            h('svg', { width: 11, height: 11, viewBox: '0 0 16 16' },
-              h('circle', { cx: 8, cy: 8, r: 3, fill: 'currentColor' }))),
           model.minimized && !expanded
             ? (radarCount > 99 ? '99+' : radarCount || '')
             : h(React.Fragment, null,
