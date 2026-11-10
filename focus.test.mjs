@@ -105,7 +105,7 @@ test('brightness is restored and bounded independently from visibility', () => {
   assert.equal(clock().getSnapshot().brightness, 122);
 });
 
-test('radar uses authoritative running status and excludes idle and child sessions', () => {
+test('radar uses authoritative running status, includes child agents, and excludes idle sessions', () => {
   const code = source.slice(source.indexOf('    function radarGroups'), source.indexOf('    const t ='));
   const context = vm.createContext({});
   vm.runInContext(code + '\nthis.group = radarGroups;', context);
@@ -118,7 +118,10 @@ test('radar uses authoritative running status and excludes idle and child sessio
   } };
   const statuses = new Map([['a', { running: false, completionUnread: true }], ['b', { running: true, completionUnread: true }], ['e', { running: true }]]);
   const groups = context.group(catalog, statuses);
-  assert.equal(groups.running.map(row => row.id).join(','), 'e,b');
+  // Child-agent conversations are listed too, and carry the child marker.
+  assert.equal(groups.running.map(row => row.id).join(','), 'e,d,b');
+  assert.equal(groups.running.find(row => row.id === 'd').child, true);
+  assert.equal(groups.running.find(row => row.id === 'e').child, false);
   assert.equal(groups.unread.map(row => row.id).join(','), 'a');
   statuses.set('a', { running: false, completionUnread: false });
   assert.equal(context.group(catalog, statuses).unread.length, 0);

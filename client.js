@@ -12,7 +12,7 @@ window.__ModuleLoader__.load({
     ];
     const zh = {
       title: 'momolulu', subtitle: '慢慢来，我陪你一起。', meadow: '草甸', hike: '徒步', lake: '湖畔',
-      radarWaiting: '等待处理', radarApproval: '请求权限', radarQuestion: '等待输入', radarSoftHint: '有其他会话可查看，无需确认或立即处理。', radar: '会话雷达', radarRunning: '运行中', radarUnread: '待查看', radarQuiet: '暂无变化', radarEmpty: '暂无会话变化', openFailed: '无法打开此会话，请从侧栏重试。', showAll: '展开全部', showLess: '收起列表', reminderPaused: '提醒随专注暂停',
+      radarWaiting: '等待处理', radarApproval: '请求权限', radarQuestion: '等待输入', radarSoftHint: '有其他会话可查看，无需确认或立即处理。', radar: '会话雷达', radarRunning: '运行中', radarUnread: '待查看', radarQuiet: '暂无变化', radarEmpty: '暂无会话变化', radarChild: '子代理', openFailed: '无法打开此会话，请从侧栏重试。', showAll: '展开全部', showLess: '收起列表', reminderPaused: '提醒随专注暂停',
       testReminder: '测试提醒（8 秒）', sound: '提示音', soundOn: '提示音 · 开', testBackground: '10 秒后响（可切屏）', soundOff: '提示音 · 关', focusCommand: '专注', focusCommandHint: '开始或暂停 momolulu 的专注计时', minimize: '缩成小头像', restore: '恢复照片', details: '详情',
       close: '收起', focus: '专注倒计时', start: '开始专注', pause: '暂停', resume: '继续', reset: '重置',
       ready: '准备好，开始一小段专注', running: '专注中', paused: '已暂停', done: '这一轮完成啦',
@@ -28,7 +28,7 @@ window.__ModuleLoader__.load({
     };
     const en = {
       title: 'momolulu', subtitle: 'One step at a time, together.', meadow: 'Meadow', hike: 'Hike', lake: 'Lake',
-      radarWaiting: 'Needs input', radarApproval: 'Permission requested', radarQuestion: 'Waiting for input', radarSoftHint: 'Other sessions have updates. No acknowledgement or immediate action required.', radar: 'Session radar', radarRunning: 'Running', radarUnread: 'Unread', radarQuiet: 'No updates', radarEmpty: 'No session changes', openFailed: 'Unable to open this session. Try the sidebar.', showAll: 'Show all', showLess: 'Show less', reminderPaused: 'Reminders paused with focus',
+      radarWaiting: 'Needs input', radarApproval: 'Permission requested', radarQuestion: 'Waiting for input', radarSoftHint: 'Other sessions have updates. No acknowledgement or immediate action required.', radar: 'Session radar', radarRunning: 'Running', radarUnread: 'Unread', radarQuiet: 'No updates', radarEmpty: 'No session changes', radarChild: 'Subagent', openFailed: 'Unable to open this session. Try the sidebar.', showAll: 'Show all', showLess: 'Show less', reminderPaused: 'Reminders paused with focus',
       testReminder: 'Test reminder (8 sec)', sound: 'Chime', soundOn: 'Chime · On', testBackground: 'Ring in 10s (switch screen)', soundOff: 'Chime · Off', focusCommand: 'Focus', focusCommandHint: 'Start or pause the momolulu focus timer', minimize: 'Minimize to avatar', restore: 'Restore photo', details: 'Details',
       close: 'Close', focus: 'Focus countdown', start: 'Start focus', pause: 'Pause', resume: 'Resume', reset: 'Reset',
       ready: 'Ready for a little focus time', running: 'Focusing', paused: 'Paused', done: 'Session complete',
@@ -47,13 +47,12 @@ window.__ModuleLoader__.load({
     function radarGroups(catalog, statuses) {
       const running = [], unread = [], waiting = [];
       for (const row of Object.values(catalog.byId)) {
-        // Child-agent addressing is separate; first version lists ordinary conversations only.
-        if (row.origin === 'subagent') continue;
         const status = statuses.get(row.id);
         const isRunning = status?.running ?? row.running;
-        if (status?.pendingInteraction) waiting.push({ ...row, attentionKind: status.pendingInteraction.kind === 'approval' ? 'radarApproval' : 'radarQuestion', requestKey: status.pendingInteraction.key });
-        else if (isRunning) running.push(row);
-        else if (status?.completionUnread) unread.push(row);
+        const child = row.origin === 'subagent';
+        if (status?.pendingInteraction) waiting.push({ ...row, child, attentionKind: status.pendingInteraction.kind === 'approval' ? 'radarApproval' : 'radarQuestion', requestKey: status.pendingInteraction.key });
+        else if (isRunning) running.push({ ...row, child });
+        else if (status?.completionUnread) unread.push({ ...row, child });
       }
       const recent = (a, b) => b.updatedAt - a.updatedAt;
       return { running: running.sort(recent), unread: unread.sort(recent), waiting: waiting.sort(recent) };
@@ -61,7 +60,7 @@ window.__ModuleLoader__.load({
     function attentionSnapshot(catalog, statuses) {
       const result = new Map();
       for (const row of Object.values(catalog.byId)) {
-        if (row.origin === 'subagent' || (row.retainedBy?.mainView ?? 0) > 0) continue;
+        if ((row.retainedBy?.mainView ?? 0) > 0) continue;
         const status = statuses.get(row.id);
         if (status?.pendingInteraction) result.set(row.id, `pending:${status.pendingInteraction.key}:${status.pendingInteraction.kind}`);
         else if (status?.completionUnread && !(status.running ?? row.running)) result.set(row.id, 'ended');
@@ -469,7 +468,7 @@ window.__ModuleLoader__.load({
             h('span', { className: 'llm-radar-dot' + (tone ? ' ' + tone : ''), 'aria-hidden': true }),
             h('span', { className: 'llm-radar-body' },
               h('span', { className: 'llm-radar-name' }, row.displayTitle || row.id),
-              h('span', { className: 'llm-radar-meta' }, when ? `${state} · ${when}` : state)),
+              h('span', { className: 'llm-radar-meta' }, [state, row.child ? t('radarChild') : '', when].filter(Boolean).join(' · '))),
             h('span', { className: 'llm-radar-go', 'aria-hidden': true }, '\u203a'));
         }));
       const drifting = model.drift && !panelMode;
