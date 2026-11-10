@@ -502,9 +502,8 @@ window.__ModuleLoader__.load({
             setRadarAttentionAt(0);
           }, 'aria-expanded': radarOpen, 'aria-controls': radarId, 'aria-label': `${t('radar')} · ${radarSummary}`, title: radarSummary + (radarHighlight ? ' · ' + t('radarSoftHint') : '') },
           h('span', { className: 'llm-radar-glyph', 'aria-hidden': true },
-            h('svg', { width: 12, height: 12, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.4 },
-              h('circle', { cx: 8, cy: 8, r: 6.2, opacity: .45 }),
-              h('circle', { cx: 8, cy: 8, r: 2.2, fill: 'currentColor', stroke: 'none' }))),
+            h('svg', { width: 11, height: 11, viewBox: '0 0 16 16' },
+              h('circle', { cx: 8, cy: 8, r: 3, fill: 'currentColor' }))),
           model.minimized && !expanded
             ? (radarCount > 99 ? '99+' : radarCount || '')
             : h(React.Fragment, null,
