@@ -144,11 +144,11 @@ window.__ModuleLoader__.load({
           oscillator.type = 'sine';
           oscillator.frequency.value = frequency;
           gain.gain.setValueAtTime(0, at);
-          gain.gain.linearRampToValueAtTime(0.12, at + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
+          gain.gain.linearRampToValueAtTime(0.32, at + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0002, at + 0.6);
           oscillator.connect(gain).connect(audio.destination);
           oscillator.start(at);
-          oscillator.stop(at + 0.4);
+          oscillator.stop(at + 0.7);
         });
       };
       // The first chime often runs while the context is still suspended; wait for it.
@@ -191,11 +191,11 @@ window.__ModuleLoader__.load({
         oscillator.type = 'sine';
         oscillator.frequency.value = 760;
         gain.gain.setValueAtTime(0.0001, at);
-        gain.gain.linearRampToValueAtTime(0.12, at + 0.02);
+        gain.gain.linearRampToValueAtTime(0.32, at + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
         oscillator.connect(gain).connect(audio.destination);
         oscillator.start(at);
-        oscillator.stop(at + 0.55);
+        oscillator.stop(at + 0.7);
         scheduledChimes.push(oscillator);
       };
       if (audio.state === 'running') arm();
