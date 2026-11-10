@@ -73,6 +73,19 @@ window.__ModuleLoader__.load({
       return [...current].some(([id, token]) => previous.get(id) !== token);
     }
     const t = (key) => translate(key);
+    const relativeFormat = typeof Intl !== 'undefined' && Intl.RelativeTimeFormat
+      ? new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
+      : null;
+    function relativeTime(timestamp, now) {
+      if (!relativeFormat || !Number.isFinite(timestamp) || timestamp <= 0) return '';
+      const seconds = Math.round((timestamp - now) / 1000);
+      if (Math.abs(seconds) < 60) return relativeFormat.format(seconds, 'second');
+      const minutes = Math.round(seconds / 60);
+      if (Math.abs(minutes) < 60) return relativeFormat.format(minutes, 'minute');
+      const hours = Math.round(minutes / 60);
+      if (Math.abs(hours) < 24) return relativeFormat.format(hours, 'hour');
+      return relativeFormat.format(Math.round(hours / 24), 'day');
+    }
     const storage = {
       read() { try { return JSON.parse(localStorage.getItem('llm.companion.v2') || 'null'); } catch { return null; } },
       save(value) { try { localStorage.setItem('llm.companion.v2', JSON.stringify(value)); } catch { /* In-memory mode is still usable. */ } },
@@ -351,9 +364,37 @@ window.__ModuleLoader__.load({
       .llm-notice{margin-top:12px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 18%,var(--dsw-alias-bg-layer-2))}.llm-controls{margin-top:10px;flex-wrap:wrap}
       .llm-settings{flex-wrap:wrap;margin-top:12px}.llm-settings label{display:flex;align-items:center;gap:8px}.llm-settings input[type=range]{width:110px;accent-color:var(--dsw-alias-brand-primary)}
       .llm-float-widget{width:184px;pointer-events:auto}.llm-photo-stage{position:relative}.llm-photo-clean{width:184px;height:166px;border-radius:22px;border-width:1px}.llm-photo-clean img{object-position:73% 90%}.llm-photo-brand{position:absolute;top:10px;left:12px;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 5px #000}.llm-minimize{position:absolute;right:7px;top:7px;width:30px;height:30px;padding:0;border:1px solid var(--dsw-alias-border-l1);border-radius:50%;background:color-mix(in srgb,var(--dsw-alias-bg-overlay) 70%,transparent);color:var(--dsw-alias-label-primary);cursor:pointer;font-size:18px!important}.llm-float-info{padding:8px 2px 0;text-align:left;background:transparent;text-shadow:0 1px 3px var(--dsw-alias-bg-base),0 0 8px var(--dsw-alias-bg-base)}.llm-float-clock-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.llm-float-clock{font-size:28px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1.1;letter-spacing:-.7px}.llm-quick{width:32px;height:32px;border-radius:50%;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);cursor:pointer}.llm-float-status,.llm-float-reminder,.llm-float-weather{font-size:11px;font-weight:500;line-height:1.5;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.llm-float-weather{color:var(--dsw-alias-label-secondary)}.llm-float-notice{display:block;margin-top:5px;padding:5px 0;background:transparent;border:0;color:var(--dsw-alias-state-warn-primary);font-size:11px;cursor:pointer;text-align:left}.llm-bubble{position:relative;width:68px;height:68px;border-radius:50%;border:0;padding:4px;background:conic-gradient(var(--dsw-alias-brand-primary) var(--llm-progress),var(--dsw-alias-border-l2) 0);cursor:pointer;pointer-events:auto}.llm-bubble img{width:60px;height:60px;object-fit:cover;object-position:73% 85%;border-radius:50%;display:block}.llm-bubble-time{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border-radius:10px;padding:1px 6px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);font-size:11px;font-variant-numeric:tabular-nums;border:1px solid var(--dsw-alias-border-l1)}.llm-bubble-notice{position:absolute;right:0;top:0;border-radius:50%;padding:0 6px;background:var(--dsw-alias-state-warn-primary);color:var(--dsw-alias-bg-base)}.llm-root button:focus-visible{outline:3px solid var(--dsw-alias-brand-primary);outline-offset:3px}.llm-bubble:hover,.llm-bubble:focus-visible{animation-play-state:paused}
-      .llm-radar-trigger{pointer-events:auto;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 9px;border:1px solid var(--dsw-alias-border-l1);border-radius:12px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);cursor:pointer;font-size:11px!important}.llm-radar-badge{position:absolute;right:-5px;top:-9px;z-index:2;min-width:27px;max-width:48px;min-height:27px;border-radius:999px;font-weight:700!important}.llm-radar-panel{position:absolute;right:0;z-index:30;max-height:min(64vh,520px);width:min(320px,calc(100vw - 32px));max-height:min(440px,calc(100dvh - 130px));overflow:auto;padding:14px;border:1px solid var(--dsw-alias-border-l2);border-radius:18px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);pointer-events:auto;box-shadow:0 12px 40px color-mix(in srgb,var(--dsw-alias-label-primary) 15%,transparent)}.llm-radar-group{margin:10px 0}.llm-radar-label{font-size:12px;font-weight:650;margin-bottom:5px}.llm-radar-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:9px 7px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--dsw-alias-border-l1);border-radius:6px;color:var(--dsw-alias-label-primary);cursor:pointer}.llm-radar-row:hover{background:var(--dsw-alias-bg-layer-2)}.llm-radar-row-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      .llm-reminder-button{display:block;width:100%;padding:0;background:transparent;border:0;color:inherit;cursor:pointer;text-align:left}.llm-alert-highlight{color:var(--dsw-alias-label-primary)!important;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 24%,var(--dsw-alias-bg-layer-1));border-left:3px solid var(--dsw-alias-state-warn-primary);border-radius:6px;padding:6px 8px!important;font-weight:700!important;white-space:normal!important;text-shadow:none}.llm-alert-actions{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}.llm-alert-actions .llm-btn{font-size:10px;padding:4px 6px}.llm-alert-shake{animation:llm-nudge .75s ease-in-out 2;transform-origin:center bottom}@keyframes llm-nudge{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-4px) rotate(-2deg)}40%{transform:translateX(4px) rotate(2deg)}60%{transform:translateX(-3px) rotate(-1deg)}80%{transform:translateX(2px) rotate(1deg)}}@media(prefers-reduced-motion:reduce){.llm-alert-shake{animation:none}}
-      .llm-radar-panel[data-placement='above']{bottom:calc(100% + 8px)}.llm-radar-panel[data-placement='below']{top:calc(100% + 8px)}.llm-radar-attention{border-color:var(--dsw-alias-state-warn-primary)!important;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 22%,var(--dsw-alias-bg-overlay))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-warn-primary) 18%,transparent)}.llm-radar-count{margin-left:6px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary)}.llm-radar-kind{display:block;color:var(--dsw-alias-state-warn-primary);font-size:11px;font-weight:600;margin-top:2px}
+      .llm-radar-trigger{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;max-width:240px;padding:4px 10px;border:1px solid var(--dsw-alias-border-l1);border-radius:999px;background:color-mix(in srgb,var(--dsw-alias-bg-overlay) 88%,transparent);color:var(--dsw-alias-label-secondary);cursor:pointer;font-size:11px!important;line-height:1.4;transition:border-color .15s,color .15s}
+.llm-radar-trigger:hover{border-color:var(--dsw-alias-border-l2);color:var(--dsw-alias-label-primary)}
+.llm-radar-trigger .llm-radar-sum{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.llm-radar-live{width:6px;height:6px;border-radius:50%;flex:none;background:var(--dsw-alias-state-idle-primary)}
+.llm-radar-live.on{background:var(--dsw-alias-state-success-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-success-primary) 22%,transparent)}
+.llm-radar-glyph{flex:none;opacity:.75}
+.llm-radar-badge{position:absolute;right:-5px;top:-9px;z-index:2;min-width:26px;max-width:48px;min-height:26px;border-radius:999px;font-weight:700!important;justify-content:center;padding:0 6px}
+.llm-radar-attention{border-color:var(--dsw-alias-state-warn-primary)!important;color:var(--dsw-alias-label-primary)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-warn-primary) 16%,transparent)}
+.llm-radar-panel{position:absolute;right:0;z-index:30;width:min(340px,calc(100vw - 32px));max-height:min(64vh,520px);overflow:auto;padding:10px;border:1px solid var(--dsw-alias-border-l2);border-radius:16px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);pointer-events:auto;box-shadow:0 16px 44px color-mix(in srgb,var(--dsw-alias-label-primary) 18%,transparent)}
+.llm-radar-head{display:flex;align-items:center;gap:8px;padding:2px 4px 8px}
+.llm-radar-title{font-size:12.5px;font-weight:700}
+.llm-radar-sum{font-size:11px;color:var(--dsw-alias-label-secondary)}
+.llm-radar-close{margin-left:auto;width:24px;height:24px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;font-size:15px!important;line-height:1}
+.llm-radar-close:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.llm-radar-group{margin-top:6px}
+.llm-radar-label{display:flex;align-items:center;justify-content:space-between;padding:6px 4px 4px;font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--dsw-alias-label-secondary)}
+.llm-radar-count{min-width:16px;padding:0 5px;border-radius:999px;background:var(--dsw-alias-bg-layer-2);text-align:center;font-variant-numeric:tabular-nums}
+.llm-radar-row{display:grid;grid-template-columns:8px minmax(0,1fr) auto;align-items:center;gap:9px;width:100%;padding:8px;border:0;border-radius:10px;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.llm-radar-row:hover{background:var(--dsw-alias-bg-layer-2)}
+.llm-radar-row:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:-2px}
+.llm-radar-dot{width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-idle-primary)}
+.llm-radar-dot.run{background:var(--dsw-alias-state-success-primary)}
+.llm-radar-dot.wait{background:var(--dsw-alias-state-warn-primary)}
+.llm-radar-body{min-width:0}
+.llm-radar-name{display:block;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.llm-radar-meta{display:block;margin-top:1px;font-size:11px;color:var(--dsw-alias-label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.llm-radar-go{color:var(--dsw-alias-label-secondary);font-size:15px;opacity:.6}
+.llm-radar-empty{padding:18px 8px;text-align:center;font-size:11.5px;color:var(--dsw-alias-label-secondary)}
+.llm-radar-hint{padding:8px 4px 2px;border-top:1px solid var(--dsw-alias-border-l1);margin-top:8px;font-size:10.5px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
+.llm-radar-panel[data-placement='above']{bottom:calc(100% + 8px)}
+.llm-radar-panel[data-placement='below']{top:calc(100% + 8px)}.llm-radar-attention{border-color:var(--dsw-alias-state-warn-primary)!important;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 22%,var(--dsw-alias-bg-overlay))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-warn-primary) 18%,transparent)}.llm-radar-count{margin-left:6px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary)}.llm-radar-kind{display:block;color:var(--dsw-alias-state-warn-primary);font-size:11px;font-weight:600;margin-top:2px}
       @keyframes llm-drift{from{transform:translateY(0)}to{transform:translateY(var(--llm-drift-px, 0px))}}
       @media(prefers-reduced-motion:reduce){.llm-drift{animation:none}.llm-photo img{transition:none}}
       @media(max-width:600px){.llm-floating{right:12px;bottom:12px}.llm-photo{width:168px;height:212px}.llm-float-widget{width:168px}.llm-photo-clean{width:168px;height:150px}.llm-card{width:min(370px,calc(100vw - 24px));max-height:calc(100dvh - 48px)}.llm-panel{padding:64px 12px 12px}.llm-clock{font-size:54px}}
@@ -418,9 +459,18 @@ window.__ModuleLoader__.load({
       };
       const renderGroup = (label, rows) => rows.length === 0 ? null : h('div', { className: 'llm-radar-group' },
         h('div', { className: 'llm-radar-label' }, label, h('span', { className: 'llm-radar-count' }, rows.length)),
-        rows.slice(0, showAll ? rows.length : 3).map((row) => button(
-          h(React.Fragment, null, h('span', { className: 'llm-radar-row-title' }, row.displayTitle || row.id, row.attentionKind && h('small', { className: 'llm-radar-kind' }, t(row.attentionKind))), h('span', { 'aria-hidden': true }, '↗')),
-          () => navigate(row), { key: row.id, className: 'llm-radar-row', title: `${row.displayTitle || row.id}${row.cwd ? '\n' + row.cwd : ''}` })));
+        rows.slice(0, showAll ? rows.length : 3).map((row) => {
+          const running = row.running === true;
+          const tone = row.attentionKind ? 'wait' : running ? 'run' : '';
+          const state = row.attentionKind ? t(row.attentionKind) : t(running ? 'radarRunning' : 'radarUnread');
+          const when = relativeTime(row.updatedAt, model.now);
+          return h('button', { key: row.id, type: 'button', className: 'llm-radar-row', title: row.cwd || row.id, onClick: () => navigate(row) },
+            h('span', { className: 'llm-radar-dot' + (tone ? ' ' + tone : ''), 'aria-hidden': true }),
+            h('span', { className: 'llm-radar-body' },
+              h('span', { className: 'llm-radar-name' }, row.displayTitle || row.id),
+              h('span', { className: 'llm-radar-meta' }, when ? `${state} · ${when}` : state)),
+            h('span', { className: 'llm-radar-go', 'aria-hidden': true }, '\u203a'));
+        }));
       const drifting = model.drift && !panelMode;
       React.useEffect(() => {
         if (!drifting) { setDriftPx(0); return undefined; }
@@ -449,15 +499,27 @@ window.__ModuleLoader__.load({
             }
             setRadarOpen(next);
             setRadarAttentionAt(0);
-          }, 'aria-expanded': radarOpen, 'aria-controls': radarId, 'aria-label': `${t('radar')} · ${radarSummary}`, title: radarSummary + (radarHighlight ? ' · ' + t('radarSoftHint') : '') }, model.minimized && !expanded ? (radarCount > 99 ? '99+' : radarCount || '☷') : `☷ ${radarSummary}`),
+          }, 'aria-expanded': radarOpen, 'aria-controls': radarId, 'aria-label': `${t('radar')} · ${radarSummary}`, title: radarSummary + (radarHighlight ? ' · ' + t('radarSoftHint') : '') },
+          h('span', { className: 'llm-radar-glyph', 'aria-hidden': true },
+            h('svg', { width: 12, height: 12, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.4 },
+              h('circle', { cx: 8, cy: 8, r: 6.2, opacity: .45 }),
+              h('circle', { cx: 8, cy: 8, r: 2.2, fill: 'currentColor', stroke: 'none' }))),
+          model.minimized && !expanded
+            ? (radarCount > 99 ? '99+' : radarCount || '')
+            : h(React.Fragment, null,
+                h('span', { className: 'llm-radar-live' + (groups.running.length ? ' on' : ''), 'aria-hidden': true }),
+                h('span', { className: 'llm-radar-sum' }, radarSummary))),
         !panelMode && radarOpen && h('section', { ref: radarPanel, id: radarId, className: 'llm-radar-panel', 'data-placement': radarPlacement?.side || 'above', style: radarPlacement ? { maxHeight: radarPlacement.maxHeight } : undefined, 'aria-label': t('radar'), onKeyDown: (event) => { if (event.key === 'Escape') { event.stopPropagation(); closeRadar(); } }, onBlur: (event) => { if (!event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== radarTrigger.current) setRadarOpen(false); } },
-          h('header', { className: 'llm-head' }, h('strong', null, t('radar')), button(t('close'), closeRadar, { className: 'llm-btn llm-actions' })),
+          h('div', { className: 'llm-radar-head' },
+            h('strong', { className: 'llm-radar-title' }, t('radar')),
+            h('span', { className: 'llm-radar-sum' }, radarSummary),
+            h('button', { type: 'button', className: 'llm-radar-close', onClick: closeRadar, 'aria-label': t('close') }, '\u00d7')),
           groups.waiting.length > 0 && renderGroup(t('radarWaiting'), groups.waiting),
           groups.running.length > 0 && renderGroup(t('radarRunning'), groups.running),
           groups.unread.length > 0 && renderGroup(t('radarUnread'), groups.unread),
-          !radarCount && h('div', { className: 'llm-sub' }, t(catalog.phase === 'ready' ? 'radarEmpty' : 'connecting')),
+          !radarCount && h('div', { className: 'llm-radar-empty' }, t(catalog.phase === 'ready' ? 'radarEmpty' : 'connecting')),
           (groups.running.length > 3 || groups.unread.length > 3 || groups.waiting.length > 3) && button(t(showAll ? 'showLess' : 'showAll'), () => setShowAll(!showAll)),
-          navigationError && h('div', { role: 'status', className: 'llm-sub' }, navigationError), h('div', { className: 'llm-summary' }, t('radarHint'))),
+          navigationError && h('div', { role: 'status', className: 'llm-sub' }, navigationError), h('div', { className: 'llm-radar-hint' }, t('radarHint'))),
 
         !expanded ? model.minimized ? h('button', {
           type: 'button', className: 'llm-bubble' + (alertShake || radarShake ? ' llm-alert-shake' : ''), key: `bubble-${Math.max(attentionAt, radarAttentionAt)}`, onClick: () => update({ minimized: false }),
