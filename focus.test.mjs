@@ -176,6 +176,26 @@ test('radar surfaces pending permissions and rolls child activity into the paren
   assert.equal(newAttention(attentionTokens(quieter), attentionTokens(afterChildFinished)), true);
 });
 
+
+test('starting a run is not an attention event', () => {
+  const code = source.slice(source.indexOf('    function radarGroups'), source.indexOf('    const t ='));
+  const context = vm.createContext({});
+  vm.runInContext(code + '\nthis.api = { radarGroups, attentionTokens, newAttention };', context);
+  const { radarGroups, attentionTokens, newAttention } = context.api;
+  const idle = { byId: { s: { id: 's', running: false, updatedAt: 1 } } };
+  const busy = { byId: { s: { id: 's', running: true, updatedAt: 2 } } };
+  const before = attentionTokens(radarGroups(idle, new Map()));
+  const after = attentionTokens(radarGroups(busy, new Map([['s', { running: true }]])));
+  assert.equal(before.size, 0);
+  assert.equal(after.size, 0);
+  assert.equal(newAttention(before, after), false);
+  // A pending request still nudges, and a brand-new request nudges again.
+  const pending1 = attentionTokens(radarGroups(busy, new Map([['s', { running: true, pendingInteraction: { key: 'k1', kind: 'approval' } }]])));
+  assert.equal(newAttention(after, pending1), true);
+  const pending2 = attentionTokens(radarGroups(busy, new Map([['s', { running: true, pendingInteraction: { key: 'k2', kind: 'approval' } }]])));
+  assert.equal(newAttention(pending1, pending2), true);
+});
+
 test('chime preference defaults to off and is restored', () => {
   assert.equal(clock().getSnapshot().sound, false);
   assert.equal(clock({ sound: true }).getSnapshot().sound, true);

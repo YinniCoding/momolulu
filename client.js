@@ -62,6 +62,7 @@ window.__ModuleLoader__.load({
           runningNow,
           unreadNow: status?.completionUnread === true && !runningNow,
           attentionKind: pending ? (pending.kind === 'approval' ? 'radarApproval' : 'radarQuestion') : undefined,
+          requestKey: pending?.key,
         };
       };
       const parentRow = (row) => {
@@ -77,7 +78,7 @@ window.__ModuleLoader__.load({
         const childBusy = entry.children.some((child) => child.runningNow);
         const childUnread = entry.children.some((child) => child.unreadNow);
         if (entry.attentionKind) waiting.push(entry);
-        else if (childWaiting) waiting.push({ ...entry, attentionKind: childWaiting.attentionKind, childAttention: true });
+        else if (childWaiting) waiting.push({ ...entry, attentionKind: childWaiting.attentionKind, requestKey: childWaiting.requestKey, childAttention: true });
         else if (entry.runningNow || childBusy) running.push(entry);
         else if (entry.unreadNow || childUnread) unread.push(entry);
       }
@@ -88,10 +89,13 @@ window.__ModuleLoader__.load({
       const tokens = new Map();
       for (const rows of Object.values(groups)) {
         for (const row of rows) {
-          const children = (row.children ?? [])
-            .map((child) => `${child.attentionKind ?? ''}${child.runningNow ? 'r' : ''}${child.unreadNow ? 'u' : ''}`)
-            .join(',');
-          tokens.set(row.id, `${row.attentionKind ?? ''}|${row.runningNow ? 'r' : ''}|${row.unreadNow ? 'u' : ''}|${children}`);
+          const childPending = (row.children ?? []).find((child) => child.attentionKind);
+          const pending = row.attentionKind ?? childPending?.attentionKind;
+          const requestKey = row.requestKey ?? childPending?.requestKey ?? '';
+          const unread = row.unreadNow || (row.children ?? []).some((child) => child.unreadNow);
+          // Merely starting to run is not an attention event.
+          if (pending === undefined && !unread) continue;
+          tokens.set(row.id, `${pending ?? ''}:${requestKey}|${unread ? 'u' : ''}`);
         }
       }
       return tokens;
