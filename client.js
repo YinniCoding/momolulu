@@ -13,7 +13,7 @@ window.__ModuleLoader__.load({
     const zh = {
       title: 'momolulu', subtitle: '慢慢来，我陪你一起。', meadow: '草甸', hike: '徒步', lake: '湖畔',
       radarWaiting: '等待处理', radarApproval: '请求权限', radarQuestion: '等待输入', radarSoftHint: '有其他会话可查看，无需确认或立即处理。', radar: '会话雷达', radarRunning: '运行中', radarUnread: '待查看', radarQuiet: '暂无变化', radarEmpty: '暂无会话变化', radarHint: '结束不代表成功；待查看状态仅在当前页面保留。', openFailed: '无法打开此会话，请从侧栏重试。', showAll: '展开全部', showLess: '收起列表', reminderPaused: '提醒随专注暂停',
-      testReminder: '测试提醒（8 秒）', sound: '提示音', soundOn: '提示音 · 开', soundOff: '提示音 · 关', focusCommand: '专注', focusCommandHint: '开始或暂停 momolulu 的专注计时', minimize: '缩成小头像', restore: '恢复照片', details: '详情',
+      testReminder: '测试提醒（8 秒）', sound: '提示音', soundOn: '提示音 · 开', testBackground: '10 秒后响（可切屏）', soundOff: '提示音 · 关', focusCommand: '专注', focusCommandHint: '开始或暂停 momolulu 的专注计时', minimize: '缩成小头像', restore: '恢复照片', details: '详情',
       close: '收起', focus: '专注倒计时', start: '开始专注', pause: '暂停', resume: '继续', reset: '重置',
       ready: '准备好，开始一小段专注', running: '专注中', paused: '已暂停', done: '这一轮完成啦',
       minutes: '分钟', elapsed: '已专注', reminders: '休息提醒', on: '开启', off: '关闭', next: '距离下次休息',
@@ -29,7 +29,7 @@ window.__ModuleLoader__.load({
     const en = {
       title: 'momolulu', subtitle: 'One step at a time, together.', meadow: 'Meadow', hike: 'Hike', lake: 'Lake',
       radarWaiting: 'Needs input', radarApproval: 'Permission requested', radarQuestion: 'Waiting for input', radarSoftHint: 'Other sessions have updates. No acknowledgement or immediate action required.', radar: 'Session radar', radarRunning: 'Running', radarUnread: 'Unread', radarQuiet: 'No updates', radarEmpty: 'No session changes', radarHint: 'Ended does not mean successful. Unread status is local to this page.', openFailed: 'Unable to open this session. Try the sidebar.', showAll: 'Show all', showLess: 'Show less', reminderPaused: 'Reminders paused with focus',
-      testReminder: 'Test reminder (8 sec)', sound: 'Chime', soundOn: 'Chime · On', soundOff: 'Chime · Off', focusCommand: 'Focus', focusCommandHint: 'Start or pause the momolulu focus timer', minimize: 'Minimize to avatar', restore: 'Restore photo', details: 'Details',
+      testReminder: 'Test reminder (8 sec)', sound: 'Chime', soundOn: 'Chime · On', testBackground: 'Ring in 10s (switch screen)', soundOff: 'Chime · Off', focusCommand: 'Focus', focusCommandHint: 'Start or pause the momolulu focus timer', minimize: 'Minimize to avatar', restore: 'Restore photo', details: 'Details',
       close: 'Close', focus: 'Focus countdown', start: 'Start focus', pause: 'Pause', resume: 'Resume', reset: 'Reset',
       ready: 'Ready for a little focus time', running: 'Focusing', paused: 'Paused', done: 'Session complete',
       minutes: 'min', elapsed: 'Focused', reminders: 'Break reminders', on: 'On', off: 'Off', next: 'Next break in',
@@ -122,7 +122,12 @@ window.__ModuleLoader__.load({
       try {
         const Ctor = window.AudioContext || window.webkitAudioContext;
         if (!Ctor) return undefined;
-        audioContext ??= new Ctor();
+        if (audioContext === undefined) {
+          audioContext = new Ctor();
+          audioContext.addEventListener?.('statechange', () => {
+            if (audioContext?.state === 'running') syncScheduledChimes();
+          });
+        }
         if (audioContext.state === 'suspended') void audioContext.resume().catch(() => {});
       } catch { audioContext = undefined; }
       return audioContext;
@@ -149,6 +154,26 @@ window.__ModuleLoader__.load({
       // The first chime often runs while the context is still suspended; wait for it.
       if (audio.state === 'running') emit();
       else Promise.resolve(audio.resume()).then(emit).catch(() => {});
+    }
+    // A near-silent oscillator holds the audio device open; without it macOS/Chromium can
+    // suspend the context while the window is hidden, and scheduled chimes never fire.
+    let keepAliveOscillator;
+    function startAudioKeepAlive() {
+      const audio = ensureAudio();
+      if (!audio || keepAliveOscillator) return;
+      try {
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        oscillator.frequency.value = 30;
+        gain.gain.value = 0.00005;
+        oscillator.connect(gain).connect(audio.destination);
+        oscillator.start();
+        keepAliveOscillator = oscillator;
+      } catch { keepAliveOscillator = undefined; }
+    }
+    function stopAudioKeepAlive() {
+      try { keepAliveOscillator?.stop(); } catch { /* already stopped */ }
+      keepAliveOscillator = undefined;
     }
     // A scheduled chime rides the audio clock, so a hidden or throttled window still rings on time.
     let scheduledChimes = [];
@@ -178,7 +203,9 @@ window.__ModuleLoader__.load({
     }
     function syncScheduledChimes() {
       cancelScheduledChimes();
-      if (!state.sound || state.status !== 'running') return;
+      if (!state.sound) { stopAudioKeepAlive(); return; }
+      startAudioKeepAlive();
+      if (state.status !== 'running') return;
       const now = Date.now();
       const today = new Date(now).toDateString();
       if (state.reminders && state.pausedDate !== today && state.nextReminder > now) scheduleChimeIn(state.nextReminder - now);
@@ -472,6 +499,7 @@ window.__ModuleLoader__.load({
             h('div', { className: 'llm-settings' }, button(t(model.reminders && !todayPaused ? 'on' : 'off'), () => setReminders(!model.reminders || todayPaused), { role: 'switch', 'aria-checked': model.reminders && !todayPaused })),
             h('div', { className: 'llm-settings' }, button(t(model.sound ? 'soundOn' : 'soundOff'), () => { const next = !model.sound; update({ sound: next }); if (next) playChime(); }, { role: 'switch', 'aria-checked': model.sound })),
             h('div', { className: 'llm-summary' }, t('reminderEvery')),
+            button(t('testBackground'), () => { startAudioKeepAlive(); scheduleChimeIn(10000); }),
             button(t('testReminder'), () => { const now = Date.now(); update({ now, previewAt: now, previewUntil: now + 8000 }, false); if (state.sound) playChime(); setOpen(false); if (panelMode) layout.selectPanel(null); }),
             h('div', { className: 'llm-summary' }, reminderLabel(model))),
           model.notice && h('div', { className: 'llm-notice', role: 'status' }, t(model.notice), h('div', { className: 'llm-controls' }, button(t('got'), () => update({ notice: '' })), model.status === 'running' && button(t('snooze'), () => update({ notice: '', nextReminder: Date.now() + 10 * 60000 })), button(t('today'), () => update({ notice: '', pausedDate: new Date().toDateString() })))),
@@ -508,6 +536,8 @@ window.__ModuleLoader__.load({
         workspace = ctx.uiWorkspace;
         translate = ctx.locale.bind(ID);
         state = initialState(storage.read());
+        // Arm the audio schedule for a restored running session (the first gesture resumes it).
+        try { syncScheduledChimes(); } catch { /* audio may still be locked until a gesture */ }
         ctx.effect(() => ctx.locale.register(ID, 'zh', zh), 'lumululu-mei Chinese');
         ctx.effect(() => ctx.locale.register(ID, 'en', en), 'lumululu-mei English');
         ctx.effect(() => {
