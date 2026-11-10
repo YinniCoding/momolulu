@@ -42,7 +42,7 @@ Preferences and timer state stay in browser `localStorage` and are never uploade
 
 ## Known limitations
 
-Ordinary sessions only (no child agents); no cross-window timer sync; timers are not OS alarms and stop when DSH is closed; no built-in updater.
+Sub-agent conversations are listed and tagged; no cross-window timer sync; timers are not OS alarms and stop when DSH is closed; no built-in updater.
 
 ## Development
 
