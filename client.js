@@ -12,7 +12,7 @@ window.__ModuleLoader__.load({
     ];
     const zh = {
       title: 'momolulu', subtitle: '慢慢来，我陪你一起。', meadow: '草甸', hike: '徒步', lake: '湖畔',
-      radarWaiting: '等待处理', radarApproval: '请求权限', radarQuestion: '等待输入', radarSoftHint: '有其他会话可查看，无需确认或立即处理。', radar: '会话雷达', radarRunning: '运行中', radarUnread: '待查看', radarQuiet: '暂无变化', radarEmpty: '暂无会话变化', radarHint: '结束不代表成功；待查看状态仅在当前页面保留。', openFailed: '无法打开此会话，请从侧栏重试。', showAll: '展开全部', showLess: '收起列表', reminderPaused: '提醒随专注暂停',
+      radarWaiting: '等待处理', radarApproval: '请求权限', radarQuestion: '等待输入', radarSoftHint: '有其他会话可查看，无需确认或立即处理。', radar: '会话雷达', radarRunning: '运行中', radarUnread: '待查看', radarQuiet: '暂无变化', radarEmpty: '暂无会话变化', openFailed: '无法打开此会话，请从侧栏重试。', showAll: '展开全部', showLess: '收起列表', reminderPaused: '提醒随专注暂停',
       testReminder: '测试提醒（8 秒）', sound: '提示音', soundOn: '提示音 · 开', testBackground: '10 秒后响（可切屏）', soundOff: '提示音 · 关', focusCommand: '专注', focusCommandHint: '开始或暂停 momolulu 的专注计时', minimize: '缩成小头像', restore: '恢复照片', details: '详情',
       close: '收起', focus: '专注倒计时', start: '开始专注', pause: '暂停', resume: '继续', reset: '重置',
       ready: '准备好，开始一小段专注', running: '专注中', paused: '已暂停', done: '这一轮完成啦',
@@ -28,7 +28,7 @@ window.__ModuleLoader__.load({
     };
     const en = {
       title: 'momolulu', subtitle: 'One step at a time, together.', meadow: 'Meadow', hike: 'Hike', lake: 'Lake',
-      radarWaiting: 'Needs input', radarApproval: 'Permission requested', radarQuestion: 'Waiting for input', radarSoftHint: 'Other sessions have updates. No acknowledgement or immediate action required.', radar: 'Session radar', radarRunning: 'Running', radarUnread: 'Unread', radarQuiet: 'No updates', radarEmpty: 'No session changes', radarHint: 'Ended does not mean successful. Unread status is local to this page.', openFailed: 'Unable to open this session. Try the sidebar.', showAll: 'Show all', showLess: 'Show less', reminderPaused: 'Reminders paused with focus',
+      radarWaiting: 'Needs input', radarApproval: 'Permission requested', radarQuestion: 'Waiting for input', radarSoftHint: 'Other sessions have updates. No acknowledgement or immediate action required.', radar: 'Session radar', radarRunning: 'Running', radarUnread: 'Unread', radarQuiet: 'No updates', radarEmpty: 'No session changes', openFailed: 'Unable to open this session. Try the sidebar.', showAll: 'Show all', showLess: 'Show less', reminderPaused: 'Reminders paused with focus',
       testReminder: 'Test reminder (8 sec)', sound: 'Chime', soundOn: 'Chime · On', testBackground: 'Ring in 10s (switch screen)', soundOff: 'Chime · Off', focusCommand: 'Focus', focusCommandHint: 'Start or pause the momolulu focus timer', minimize: 'Minimize to avatar', restore: 'Restore photo', details: 'Details',
       close: 'Close', focus: 'Focus countdown', start: 'Start focus', pause: 'Pause', resume: 'Resume', reset: 'Reset',
       ready: 'Ready for a little focus time', running: 'Focusing', paused: 'Paused', done: 'Session complete',
@@ -393,7 +393,7 @@ window.__ModuleLoader__.load({
 .llm-radar-meta{display:block;margin-top:1px;font-size:11px;color:var(--dsw-alias-label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .llm-radar-go{color:var(--dsw-alias-label-secondary);font-size:15px;opacity:.6}
 .llm-radar-empty{padding:18px 8px;text-align:center;font-size:11.5px;color:var(--dsw-alias-label-secondary)}
-.llm-radar-hint{padding:8px 4px 2px;border-top:1px solid var(--dsw-alias-border-l1);margin-top:8px;font-size:10.5px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
+
 .llm-radar-panel[data-placement='above']{bottom:calc(100% + 8px)}
 .llm-radar-panel[data-placement='below']{top:calc(100% + 8px)}.llm-radar-attention{border-color:var(--dsw-alias-state-warn-primary)!important;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 22%,var(--dsw-alias-bg-overlay))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--dsw-alias-state-warn-primary) 18%,transparent)}.llm-radar-count{margin-left:6px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary)}.llm-radar-kind{display:block;color:var(--dsw-alias-state-warn-primary);font-size:11px;font-weight:600;margin-top:2px}
       @keyframes llm-drift{from{transform:translateY(0)}to{transform:translateY(var(--llm-drift-px, 0px))}}
@@ -516,7 +516,7 @@ window.__ModuleLoader__.load({
           groups.unread.length > 0 && renderGroup(t('radarUnread'), groups.unread),
           !radarCount && h('div', { className: 'llm-radar-empty' }, t(catalog.phase === 'ready' ? 'radarEmpty' : 'connecting')),
           (groups.running.length > 3 || groups.unread.length > 3 || groups.waiting.length > 3) && button(t(showAll ? 'showLess' : 'showAll'), () => setShowAll(!showAll)),
-          navigationError && h('div', { role: 'status', className: 'llm-sub' }, navigationError), h('div', { className: 'llm-radar-hint' }, t('radarHint'))),
+          navigationError && h('div', { role: 'status', className: 'llm-sub' }, navigationError)),
 
         !expanded ? model.minimized ? h('button', {
           type: 'button', className: 'llm-bubble' + (alertShake || radarShake ? ' llm-alert-shake' : ''), key: `bubble-${Math.max(attentionAt, radarAttentionAt)}`, onClick: () => update({ minimized: false }),
