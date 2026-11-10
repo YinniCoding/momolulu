@@ -108,9 +108,11 @@ window.__ModuleLoader__.load({
     const listeners = new Set();
     const getSnapshot = () => state;
     const subscribe = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+    const CHIME_KEYS = ['status', 'sound', 'reminders', 'nextReminder', 'deadline', 'pausedDate'];
     function update(patch, persist = true) {
       state = { ...state, ...patch };
       if (persist) storage.save(state);
+      if (CHIME_KEYS.some((key) => key in patch)) syncScheduledChimes();
       for (const fn of listeners) fn();
     }
     // Optional chime. The AudioContext is created only after a user gesture, so
@@ -148,16 +150,48 @@ window.__ModuleLoader__.load({
       if (audio.state === 'running') emit();
       else Promise.resolve(audio.resume()).then(emit).catch(() => {});
     }
+    // A scheduled chime rides the audio clock, so a hidden or throttled window still rings on time.
+    let scheduledChimes = [];
+    function cancelScheduledChimes() {
+      for (const node of scheduledChimes) { try { node.stop(); } catch { /* already stopped */ } }
+      scheduledChimes = [];
+    }
+    function scheduleChimeIn(delayMs) {
+      const audio = ensureAudio();
+      if (!audio) return;
+      const arm = () => {
+        const at = audio.currentTime + Math.max(0, delayMs) / 1000;
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 760;
+        gain.gain.setValueAtTime(0.0001, at);
+        gain.gain.linearRampToValueAtTime(0.12, at + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
+        oscillator.connect(gain).connect(audio.destination);
+        oscillator.start(at);
+        oscillator.stop(at + 0.55);
+        scheduledChimes.push(oscillator);
+      };
+      if (audio.state === 'running') arm();
+      else Promise.resolve(audio.resume()).then(arm).catch(() => {});
+    }
+    function syncScheduledChimes() {
+      cancelScheduledChimes();
+      if (!state.sound || state.status !== 'running') return;
+      const now = Date.now();
+      const today = new Date(now).toDateString();
+      if (state.reminders && state.pausedDate !== today && state.nextReminder > now) scheduleChimeIn(state.nextReminder - now);
+      if (state.deadline > now) scheduleChimeIn(state.deadline - now);
+    }
     function tick(now = Date.now()) {
       const patch = { now };
       let persist = false;
       if (state.status === 'running' && remainingMs(state, now) === 0) {
         Object.assign(patch, { status: 'done', remaining: 0, notice: 'finish', noticeAt: now });
-        if (state.sound) playChime();
         persist = true;
       } else if (state.status === 'running' && state.reminders && state.pausedDate !== new Date(now).toDateString() && state.nextReminder && now >= state.nextReminder) {
         Object.assign(patch, { notice: 'break', noticeAt: now, nextReminder: now + 20 * 60000 });
-        if (state.sound) playChime();
         persist = true;
       }
       update(patch, persist);
@@ -379,7 +413,7 @@ window.__ModuleLoader__.load({
         window.addEventListener('resize', measure);
         return () => window.removeEventListener('resize', measure);
       }, [drifting, expanded, model.minimized]);
-      return h('div', { className: `llm-root ${panelMode ? 'llm-panel' : 'llm-floating'}`, onPointerDownCapture: () => { if (model.sound) ensureAudio(); } },
+      return h('div', { className: `llm-root ${panelMode ? 'llm-panel' : 'llm-floating'}`, onPointerDownCapture: () => { if (model.sound) { ensureAudio(); syncScheduledChimes(); } } },
         h('style', null, css),
         model.bgOn && h('div', { className: 'llm-bg' + (model.readingProtection && !panelMode ? ' llm-bg-protected' : ''), style: { backgroundImage: `url("${asset(currentScene.name)}")`, opacity: model.intensity / 100, filter: `brightness(${model.brightness / 100}) saturate(1.12)` } }),
 
@@ -483,6 +517,11 @@ window.__ModuleLoader__.load({
           return () => { weatherActive = false; locationGeneration++; weatherController?.abort(); stop(); };
         }, 'lumululu-mei weather');
         ctx.effect(() => { tick(); return ctx.timer.interval(() => tick(), 1000); }, 'lumululu-mei focus clock');
+        ctx.effect(() => {
+          const onVisible = () => { if (document.visibilityState === 'visible') syncScheduledChimes(); };
+          document.addEventListener('visibilitychange', onVisible);
+          return () => document.removeEventListener('visibilitychange', onVisible);
+        }, 'momolulu chime resync');
         ctx.effect(() => {
           const control = createFullscreenControl({
             active: () => document.fullscreenElement === document.documentElement,
