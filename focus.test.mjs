@@ -132,7 +132,7 @@ test('radar groups child agents under their parent instead of listing them separ
   assert.equal(parent.children[0].id, 'd');
   assert.equal(parent.children[0].child, true);
   // A parent with no child stays empty rather than undefined.
-  assert.deepEqual(groups.running.find((row) => row.id === 'b').children, []);
+  assert.equal(groups.running.find((row) => row.id === 'b').children.length, 0);
   statuses.set('a', { running: false, completionUnread: false });
   assert.equal(context.group(catalog, statuses).unread.length, 0);
 });
