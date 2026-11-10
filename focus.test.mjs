@@ -137,30 +137,44 @@ test('radar groups child agents under their parent instead of listing them separ
   assert.equal(context.group(catalog, statuses).unread.length, 0);
 });
 
-test('radar recognizes pending permissions/input without invoking their answer methods', () => {
+test('radar surfaces pending permissions and rolls child activity into the parent', () => {
   const code = source.slice(source.indexOf('    function radarGroups'), source.indexOf('    const t ='));
   const context = vm.createContext({});
-  vm.runInContext(code + '\nthis.api = { radarGroups, attentionSnapshot, newAttention };', context);
-  const { radarGroups, attentionSnapshot, newAttention } = context.api;
-  const catalog = { byId: { a: { id: 'a', running: true }, b: { id: 'b', running: true }, c: { id: 'c', retainedBy: { mainView: 1 } } } };
-  const statuses = new Map([['a', { pendingInteraction: { key: 'p1', kind: 'approval', answer() { throw Error('Must not answer'); } } }], ['b', { pendingInteraction: { key: 'q1', kind: 'question' } }], ['c', { completionUnread: true }]]);
+  vm.runInContext(code + '\nthis.api = { radarGroups, attentionTokens, newAttention };', context);
+  const { radarGroups, attentionTokens, newAttention } = context.api;
+  const catalog = { byId: {
+    a: { id: 'a', running: true },
+    b: { id: 'b', running: true },
+    c: { id: 'c', retainedBy: { mainView: 1 } },
+    p: { id: 'p', running: false, updatedAt: 2 },
+    k: { id: 'k', origin: 'subagent', parentId: 'p', running: true, updatedAt: 3 },
+  } };
+  const statuses = new Map([
+    ['a', { pendingInteraction: { key: 'p1', kind: 'approval' } }],
+    ['b', { pendingInteraction: { key: 'q1', kind: 'question' } }],
+    ['k', { pendingInteraction: { key: 'k1', kind: 'question' } }],
+  ]);
   const groups = radarGroups(catalog, statuses);
-  assert.equal(groups.waiting.length, 2);
+  assert.equal(groups.waiting.length, 3);
   assert.equal(groups.running.length, 0);
-  assert.equal(groups.waiting.find(row => row.id === 'a').attentionKind, 'radarApproval');
-  assert.equal(groups.waiting.find(row => row.id === 'b').attentionKind, 'radarQuestion');
-  const baseline = attentionSnapshot(catalog, statuses);
-  assert.equal(baseline.has('c'), false);
-  assert.equal(newAttention(null, baseline), false);
-  assert.equal(newAttention(baseline, attentionSnapshot(catalog, statuses)), false);
-  statuses.set('a', { pendingInteraction: { key: 'p2', kind: 'approval' } });
-  assert.equal(newAttention(baseline, attentionSnapshot(catalog, statuses)), true);
-  statuses.delete('a'); statuses.delete('b');
-  assert.equal(newAttention(baseline, attentionSnapshot(catalog, statuses)), false);
-  statuses.set('a', { running: false, completionUnread: true });
-  assert.equal(newAttention(new Map(), attentionSnapshot(catalog, statuses)), true);
-});
+  assert.equal(groups.waiting.find((row) => row.id === 'a').attentionKind, 'radarApproval');
+  assert.equal(groups.waiting.find((row) => row.id === 'b').attentionKind, 'radarQuestion');
+  // A child waiting for input promotes its idle parent into the waiting group.
+  const promoted = groups.waiting.find((row) => row.id === 'p');
+  assert.equal(promoted.childAttention, true);
+  assert.equal(promoted.children.length, 1);
 
+  // Child activity participates in the attention token, so it can trigger a nudge.
+  const baseline = attentionTokens(groups);
+  assert.equal(newAttention(null, baseline), false);
+  assert.equal(newAttention(baseline, attentionTokens(groups)), false);
+  const quieter = radarGroups(catalog, new Map());
+  statuses.set('k', { running: false, completionUnread: true });
+  statuses.delete('a');
+  statuses.delete('b');
+  const afterChildFinished = radarGroups(catalog, statuses);
+  assert.equal(newAttention(attentionTokens(quieter), attentionTokens(afterChildFinished)), true);
+});
 
 test('chime preference defaults to off and is restored', () => {
   assert.equal(clock().getSnapshot().sound, false);

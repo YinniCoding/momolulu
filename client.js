@@ -73,24 +73,28 @@ window.__ModuleLoader__.load({
       for (const row of rows) {
         if (row.origin === 'subagent') continue;
         const entry = parentRow(row);
+        const childWaiting = entry.children.find((child) => child.attentionKind);
         const childBusy = entry.children.some((child) => child.runningNow);
-        const childUnread = entry.children.some((child) => child.unreadNow || child.attentionKind);
+        const childUnread = entry.children.some((child) => child.unreadNow);
         if (entry.attentionKind) waiting.push(entry);
+        else if (childWaiting) waiting.push({ ...entry, attentionKind: childWaiting.attentionKind, childAttention: true });
         else if (entry.runningNow || childBusy) running.push(entry);
         else if (entry.unreadNow || childUnread) unread.push(entry);
       }
       const recent = (a, b) => b.updatedAt - a.updatedAt;
       return { running: running.sort(recent), unread: unread.sort(recent), waiting: waiting.sort(recent) };
     }
-    function attentionSnapshot(catalog, statuses) {
-      const result = new Map();
-      for (const row of Object.values(catalog.byId)) {
-        if (row.origin === 'subagent' || (row.retainedBy?.mainView ?? 0) > 0) continue;
-        const status = statuses.get(row.id);
-        if (status?.pendingInteraction) result.set(row.id, `pending:${status.pendingInteraction.key}:${status.pendingInteraction.kind}`);
-        else if (status?.completionUnread && !(status.running ?? row.running)) result.set(row.id, 'ended');
+    function attentionTokens(groups) {
+      const tokens = new Map();
+      for (const rows of Object.values(groups)) {
+        for (const row of rows) {
+          const children = (row.children ?? [])
+            .map((child) => `${child.attentionKind ?? ''}${child.runningNow ? 'r' : ''}${child.unreadNow ? 'u' : ''}`)
+            .join(',');
+          tokens.set(row.id, `${row.attentionKind ?? ''}|${row.runningNow ? 'r' : ''}|${row.unreadNow ? 'u' : ''}|${children}`);
+        }
       }
-      return result;
+      return tokens;
     }
     function newAttention(previous, current) {
       if (!previous) return false; // Establish baseline quietly after page load.
@@ -453,14 +457,14 @@ window.__ModuleLoader__.load({
       const [radarAttentionAt, setRadarAttentionAt] = React.useState(0);
       React.useEffect(() => {
         if (catalog.phase !== 'ready') { previousAttention.current = null; return; }
-        const current = attentionSnapshot(catalog, statuses);
+        const current = attentionTokens(groups);
         const now = Date.now();
         if (!panelMode && newAttention(previousAttention.current, current) && now - lastNudge.current >= 8000) {
           lastNudge.current = now;
           setRadarAttentionAt(now);
         }
         previousAttention.current = current;
-      }, [catalog, statuses, panelMode]);
+      }, [groups, catalog.phase, panelMode]);
       const radarHighlight = radarAttentionAt > 0 && model.now - radarAttentionAt < 12000;
       const radarShake = radarHighlight && model.now - radarAttentionAt < 1800;
       const [open, setOpen] = React.useState(false);
@@ -490,7 +494,8 @@ window.__ModuleLoader__.load({
         catch { setNavigationError(t('openFailed')); }
       };
       const rowMeta = (row) => {
-        const state = row.attentionKind ? t(row.attentionKind) : t(row.runningNow ? 'radarRunning' : 'radarUnread');
+        const running = row.runningNow || (row.children ?? []).some((child) => child.runningNow);
+        const state = row.attentionKind ? t(row.attentionKind) : t(running ? 'radarRunning' : 'radarUnread');
         const when = relativeTime(row.updatedAt, model.now);
         return [state, row.child ? t('radarChild') : '', when].filter(Boolean).join(' · ');
       };
@@ -527,6 +532,7 @@ window.__ModuleLoader__.load({
       React.useEffect(() => {
         if (!drifting) { setDriftPx(0); return undefined; }
         const measure = () => {
+          if (expanded) return;
           const height = stackRef.current?.getBoundingClientRect().height ?? 0;
           const travel = Math.round(height + 136 - window.innerHeight);
           setDriftPx(Math.min(0, travel));
