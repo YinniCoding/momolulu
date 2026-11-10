@@ -45,14 +45,39 @@ window.__ModuleLoader__.load({
     let layout, translate, workspace;
     const selectStatus = (snapshot) => snapshot;
     function radarGroups(catalog, statuses) {
-      const running = [], unread = [], waiting = [];
-      for (const row of Object.values(catalog.byId)) {
+      const rows = Object.values(catalog.byId);
+      const childrenByParent = new Map();
+      for (const row of rows) {
+        if (row.origin !== 'subagent' || !row.parentId) continue;
+        const list = childrenByParent.get(row.parentId) ?? [];
+        list.push(row);
+        childrenByParent.set(row.parentId, list);
+      }
+      const describe = (row) => {
         const status = statuses.get(row.id);
-        const isRunning = status?.running ?? row.running;
-        const child = row.origin === 'subagent';
-        if (status?.pendingInteraction) waiting.push({ ...row, child, attentionKind: status.pendingInteraction.kind === 'approval' ? 'radarApproval' : 'radarQuestion', requestKey: status.pendingInteraction.key });
-        else if (isRunning) running.push({ ...row, child });
-        else if (status?.completionUnread) unread.push({ ...row, child });
+        const runningNow = status?.running ?? row.running ?? false;
+        const pending = status?.pendingInteraction;
+        return {
+          ...row,
+          runningNow,
+          unreadNow: status?.completionUnread === true && !runningNow,
+          attentionKind: pending ? (pending.kind === 'approval' ? 'radarApproval' : 'radarQuestion') : undefined,
+        };
+      };
+      const parentRow = (row) => {
+        const self = describe(row);
+        const children = (childrenByParent.get(row.id) ?? []).map((child) => ({ ...describe(child), child: true }));
+        return { ...self, children };
+      };
+      const running = [], unread = [], waiting = [];
+      for (const row of rows) {
+        if (row.origin === 'subagent') continue;
+        const entry = parentRow(row);
+        const childBusy = entry.children.some((child) => child.runningNow);
+        const childUnread = entry.children.some((child) => child.unreadNow || child.attentionKind);
+        if (entry.attentionKind) waiting.push(entry);
+        else if (entry.runningNow || childBusy) running.push(entry);
+        else if (entry.unreadNow || childUnread) unread.push(entry);
       }
       const recent = (a, b) => b.updatedAt - a.updatedAt;
       return { running: running.sort(recent), unread: unread.sort(recent), waiting: waiting.sort(recent) };
@@ -60,7 +85,7 @@ window.__ModuleLoader__.load({
     function attentionSnapshot(catalog, statuses) {
       const result = new Map();
       for (const row of Object.values(catalog.byId)) {
-        if ((row.retainedBy?.mainView ?? 0) > 0) continue;
+        if (row.origin === 'subagent' || (row.retainedBy?.mainView ?? 0) > 0) continue;
         const status = statuses.get(row.id);
         if (status?.pendingInteraction) result.set(row.id, `pending:${status.pendingInteraction.key}:${status.pendingInteraction.kind}`);
         else if (status?.completionUnread && !(status.running ?? row.running)) result.set(row.id, 'ended');
@@ -390,6 +415,12 @@ window.__ModuleLoader__.load({
 .llm-radar-body{min-width:0}
 .llm-radar-name{display:block;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .llm-radar-meta{display:block;margin-top:1px;font-size:11px;color:var(--dsw-alias-label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.llm-radar-toggle{display:flex;align-items:center;gap:4px;margin:2px 0 4px 17px;padding:2px 4px;border:0;border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary);font-size:10.5px!important;cursor:pointer}
+.llm-radar-toggle:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-2)}
+.llm-radar-caret{font-size:9px;opacity:.8}
+.llm-radar-children{margin:0 0 4px 16px;padding-left:6px;border-left:1px solid var(--dsw-alias-border-l1)}
+.llm-radar-row.is-child{padding:6px}
+.llm-radar-row.is-child .llm-radar-name{font-weight:500;font-size:12px}
 .llm-radar-go{color:var(--dsw-alias-label-secondary);font-size:15px;opacity:.6}
 .llm-radar-empty{padding:18px 8px;text-align:center;font-size:11.5px;color:var(--dsw-alias-label-secondary)}
 
@@ -407,6 +438,7 @@ window.__ModuleLoader__.load({
       const [showAll, setShowAll] = React.useState(false);
       const [navigationError, setNavigationError] = React.useState('');
       const [radarPlacement, setRadarPlacement] = React.useState(null);
+      const [expandedParents, setExpandedParents] = React.useState({});
       const radarTrigger = React.useRef(null);
       const stackRef = React.useRef(null);
       const [driftPx, setDriftPx] = React.useState(0);
@@ -454,23 +486,43 @@ window.__ModuleLoader__.load({
       ].filter(Boolean).join(' · ') || t('radarQuiet');
       const closeRadar = () => { setRadarOpen(false); radarTrigger.current?.focus(); };
       const navigate = (row) => {
-        try { workspace.openSession(row.id); setRadarOpen(false); setOpen(false); setNavigationError(''); }
+        try { workspace.openSession(row.child && row.parentId ? row.parentId : row.id); setRadarOpen(false); setOpen(false); setNavigationError(''); }
         catch { setNavigationError(t('openFailed')); }
+      };
+      const rowMeta = (row) => {
+        const state = row.attentionKind ? t(row.attentionKind) : t(row.runningNow ? 'radarRunning' : 'radarUnread');
+        const when = relativeTime(row.updatedAt, model.now);
+        return [state, row.child ? t('radarChild') : '', when].filter(Boolean).join(' · ');
+      };
+      const rowTone = (row) => row.attentionKind ? 'wait' : row.runningNow ? 'run' : '';
+      const renderRow = (row, { nested = false } = {}) => h('button', {
+        key: (nested ? 'child-' : '') + row.id,
+        type: 'button',
+        className: 'llm-radar-row' + (nested ? ' is-child' : ''),
+        title: row.cwd || row.id,
+        onClick: () => navigate(row),
+      },
+        h('span', { className: 'llm-radar-dot' + (rowTone(row) ? ' ' + rowTone(row) : ''), 'aria-hidden': true }),
+        h('span', { className: 'llm-radar-body' },
+          h('span', { className: 'llm-radar-name' }, row.displayTitle || row.id),
+          h('span', { className: 'llm-radar-meta' }, rowMeta(row))),
+        h('span', { className: 'llm-radar-go', 'aria-hidden': true }, '\u203a'));
+      const renderEntry = (row) => {
+        const children = row.children ?? [];
+        const open = expandedParents[row.id] === true;
+        return h(React.Fragment, { key: row.id },
+          renderRow(row),
+          children.length > 0 && h('button', {
+            type: 'button',
+            className: 'llm-radar-toggle',
+            'aria-expanded': open,
+            onClick: () => setExpandedParents((previous) => ({ ...previous, [row.id]: !open })),
+          }, h('span', { className: 'llm-radar-caret', 'aria-hidden': true }, open ? '\u25be' : '\u25b8'), `${children.length} ${t('radarChild')}`),
+          open && h('div', { className: 'llm-radar-children' }, children.map((child) => renderRow(child, { nested: true }))));
       };
       const renderGroup = (label, rows) => rows.length === 0 ? null : h('div', { className: 'llm-radar-group' },
         h('div', { className: 'llm-radar-label' }, label, h('span', { className: 'llm-radar-count' }, rows.length)),
-        rows.slice(0, showAll ? rows.length : 3).map((row) => {
-          const running = row.running === true;
-          const tone = row.attentionKind ? 'wait' : running ? 'run' : '';
-          const state = row.attentionKind ? t(row.attentionKind) : t(running ? 'radarRunning' : 'radarUnread');
-          const when = relativeTime(row.updatedAt, model.now);
-          return h('button', { key: row.id, type: 'button', className: 'llm-radar-row', title: row.cwd || row.id, onClick: () => navigate(row) },
-            h('span', { className: 'llm-radar-dot' + (tone ? ' ' + tone : ''), 'aria-hidden': true }),
-            h('span', { className: 'llm-radar-body' },
-              h('span', { className: 'llm-radar-name' }, row.displayTitle || row.id),
-              h('span', { className: 'llm-radar-meta' }, [state, row.child ? t('radarChild') : '', when].filter(Boolean).join(' · '))),
-            h('span', { className: 'llm-radar-go', 'aria-hidden': true }, '\u203a'));
-        }));
+        rows.slice(0, showAll ? rows.length : 3).map(renderEntry));
       const drifting = model.drift && !panelMode;
       React.useEffect(() => {
         if (!drifting) { setDriftPx(0); return undefined; }

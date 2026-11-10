@@ -105,7 +105,7 @@ test('brightness is restored and bounded independently from visibility', () => {
   assert.equal(clock().getSnapshot().brightness, 122);
 });
 
-test('radar uses authoritative running status, includes child agents, and excludes idle sessions', () => {
+test('radar groups child agents under their parent instead of listing them separately', () => {
   const code = source.slice(source.indexOf('    function radarGroups'), source.indexOf('    const t ='));
   const context = vm.createContext({});
   vm.runInContext(code + '\nthis.group = radarGroups;', context);
@@ -113,16 +113,26 @@ test('radar uses authoritative running status, includes child agents, and exclud
     a: { id: 'a', running: true, updatedAt: 1 },
     b: { id: 'b', running: false, updatedAt: 3 },
     c: { id: 'c', running: false, updatedAt: 4 },
-    d: { id: 'd', running: true, updatedAt: 5, origin: 'subagent' },
     e: { id: 'e', running: true, updatedAt: 6 },
+    d: { id: 'd', origin: 'subagent', parentId: 'e', running: true, updatedAt: 5 },
   } };
-  const statuses = new Map([['a', { running: false, completionUnread: true }], ['b', { running: true, completionUnread: true }], ['e', { running: true }]]);
+  const statuses = new Map([
+    ['a', { running: false, completionUnread: true }],
+    ['b', { running: true, completionUnread: true }],
+    ['e', { running: true }],
+    ['d', { running: true }],
+  ]);
   const groups = context.group(catalog, statuses);
-  // Child-agent conversations are listed too, and carry the child marker.
-  assert.equal(groups.running.map(row => row.id).join(','), 'e,d,b');
-  assert.equal(groups.running.find(row => row.id === 'd').child, true);
-  assert.equal(groups.running.find(row => row.id === 'e').child, false);
-  assert.equal(groups.unread.map(row => row.id).join(','), 'a');
+  // Parents only on the top level.
+  assert.equal(groups.running.map((row) => row.id).join(','), 'e,b');
+  assert.equal(groups.unread.map((row) => row.id).join(','), 'a');
+  // The child rides along under its parent, flagged for the nested list.
+  const parent = groups.running.find((row) => row.id === 'e');
+  assert.equal(parent.children.length, 1);
+  assert.equal(parent.children[0].id, 'd');
+  assert.equal(parent.children[0].child, true);
+  // A parent with no child stays empty rather than undefined.
+  assert.deepEqual(groups.running.find((row) => row.id === 'b').children, []);
   statuses.set('a', { running: false, completionUnread: false });
   assert.equal(context.group(catalog, statuses).unread.length, 0);
 });
